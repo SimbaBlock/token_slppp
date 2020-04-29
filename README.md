@@ -16,84 +16,13 @@
 	{"code":"4000012","data":"","msg":"签名错误"}
 	{"code":"4000013","data":"","msg":"上链失败"}
 
-#创建token:
-
-    URL:/rest/Api/issueToken
-  
-    传参:
-    {
-	    "short_name": "ABC",
-	    "full_name": "ABC is nice",
-	    "url": "http://www.baidu.com",
-	    "hash": "hashhahahahahahahahahahahahahah",
-	    "precition": "8",
-	    "quantity": "1000000000000000",
-	    "minter_address": "19VvkL2jZctXr7NQEWwuSyXMAWGzMCzFba",
-	    "issuer_address": "1LQ5kvQUoE1iat3aVkjRkmj6nwvntkgz1m"
-    }
-    
-    返回结果：
-    {
-    	"code": 200,
-    	"msg": "",
-    	"data": {
-    		"hex": "sadjlaslkjdalskjdalksjdaksldasdas"
-    	}
-    }
- 
-#token增发:   
-
-    URL:/rest/Api/mintToken
-  
-    传参:
-    {
-	    "token_id": "ad0ed3f85abccde1785f8190e9c4668ff099174f298085a92a06600dd6ba39a3",
-	    "mint_total": "10000000000000000",
-	    "minter_address": "1ApUhRDmUKi2oHkS9K9nXQ36uwnPXz1Hei",
-	    "issuer_address": "19VvkL2jZctXr7NQEWwuSyXMAWGzMCzFba"
-    }
-
-    返回结果：
-    {
-    	"code": 200,
-    	"msg": "",
-    	"data": {
-    		"hex": "sadjlaslkjdalskjdalksjdaksldasdas"
-    	}
-    }
-
-#发送:  
-
-    URL:/rest/Api/sendToken
-    传参:
-    {
-	    "token_id": "ad0ed3f85abccde1785f8190e9c4668ff099174f298085a92a06600dd6ba39a3",
-	    "transfer_to": [{
-		  "account_address": "1HmiHiDqBuumMXpGYdVAWvgi21DzQV91C8",
-		  "amount": 1
-	  }, {
-		    "account_address": "1AN9P63fc93v2wpH261Vyjrioq33W7p79e",
-		    "amount": 1
-	    }],
-	    "transfer_from_address": "19VvkL2jZctXr7NQEWwuSyXMAWGzMCzFba"
-    }
-
-    返回结果：
-    {
-    	"code": 200,
-    	"msg": "",
-    	"data": {
-    		"hex": "sadjlaslkjdalskjdalksjdaksldasdas"
-    	}
-    }
 
 #上链:  
 
     URL:/rest/Api/broadcastTx
     传参:
     {
-    	"hex": "0200000002aa8f24d4548a90ec3871a00e80049a27f46405",
-	    "type": "send"			// mint // issue
+    	"hex": "0200000002aa8f24d4548a90ec3871a00e80049a27f46405"
     }
 
     返回结果：
