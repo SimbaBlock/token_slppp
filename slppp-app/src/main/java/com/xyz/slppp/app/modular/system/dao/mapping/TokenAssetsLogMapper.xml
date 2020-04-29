@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.slppp.app.modular.system.dao.TokenAssetsLogMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xyz.slppp.app.modular.system.model.TokenAssetsLog">
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="token_id" property="tokenId" jdbcType="VARCHAR"/>
+		<result column="quantity" property="quantity" jdbcType="BIGINT"/>
+		<result column="precition" property="precition" jdbcType="INTEGER"/>
+		<result column="from_address" property="fromAddress" jdbcType="VARCHAR"/>
+		<result column="to_address" property="toAddress" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		txid, `value`, n
+	</sql>
+
+	<select id="findByAddress" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM	`token_assets_log`
+		<where>
+			<if test="fromAddress != null">
+				and from_address = #{fromAddress}
+			</if>
+			<if test="toAddress != null">
+				and to_address = #{toAddress}
+			</if>
+		</where>>
+	</select>
+
+	<insert id="insertTokenAssetsLog" parameterType="com.xyz.slppp.app.modular.system.model.TokenAssetsLog">
+		insert into token_assets_log
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="tokenId != null" >
+				`token_id`,
+			</if>
+			<if test="quantity != null" >
+				quantity,
+			</if>
+			<if test="precition != null" >
+				precition,
+			</if>
+			<if test="fromAddress != null" >
+				from_address,
+			</if>
+			<if test="toAddress != null" >
+				to_address,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="tokenId != null" >
+				#{tokenId,jdbcType=VARCHAR},
+			</if>
+			<if test="quantity != null" >
+				#{quantity,jdbcType=BIGINT},
+			</if>
+			<if test="precition != null" >
+				#{precition,jdbcType=INTEGER},
+			</if>
+			<if test="fromAddress != null" >
+				#{fromAddress,jdbcType=VARCHAR},
+			</if>
+			<if test="toAddress != null" >
+				#{toAddress,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

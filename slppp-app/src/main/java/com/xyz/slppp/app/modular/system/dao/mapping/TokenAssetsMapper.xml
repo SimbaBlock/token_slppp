@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.slppp.app.modular.system.dao.TokenAssetsMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xyz.slppp.app.modular.system.model.TokenAssets">
+		<result column="token_id" property="tokenId" jdbcType="VARCHAR"/>
+		<result column="address" property="address" jdbcType="VARCHAR"/>
+		<result column="token" property="token" jdbcType="BIGINT"/>
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="vout" property="vout" jdbcType="INTEGER"/>
+		<result column="from_address" property="fromAddress" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		token_id, address, token, txid, vout, from_address
+	</sql>
+
+	<select id="selectToken" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`token_assets` where token_id = #{tokenId} and address = #{address}
+	</select>
+
+	<select id="selectAddressToken" resultType="java.math.BigInteger">
+		SELECT
+			sum(token)
+		FROM
+		`token_assets` where token_id = #{tokenId} and address = #{address}
+	</select>
+
+	<select id="selectFromAddressToken" resultType="java.math.BigInteger">
+		SELECT
+			sum(token)
+		FROM
+		`token_assets` where token_id = #{tokenId} and from_address = #{address}
+	</select>
+
+
+	<select id="findByTokenAssets" resultType="com.xyz.slppp.app.modular.system.model.TokenAssets">
+		SELECT
+			*
+		FROM
+		`token_assets` where txid = #{txid} and vout = #{vout}
+	</select>
+
+	<insert id="insertTokenAssets" parameterType="com.xyz.slppp.app.modular.system.model.TokenAssets">
+		insert into token_assets
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="tokenId != null" >
+				`token_id`,
+			</if>
+			<if test="address != null" >
+				`address`,
+			</if>
+			<if test="token != null" >
+				`token`,
+			</if>
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="vout != null" >
+				`vout`,
+			</if>
+			<if test="fromAddress != null" >
+				`from_address`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="tokenId != null" >
+				#{tokenId,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="token != null" >
+				#{token,jdbcType=BIGINT},
+			</if>
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="vout != null" >
+				#{vout,jdbcType=INTEGER},
+			</if>
+			<if test="fromAddress != null" >
+				#{fromAddress,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+
+	<select id="selectAddressCount" resultType="int">
+
+		SELECT
+			count(0)
+		FROM
+		`token_assets` where address = #{address}
+
+	</select>
+
+</mapper>

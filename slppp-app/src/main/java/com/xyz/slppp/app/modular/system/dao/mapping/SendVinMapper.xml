@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.slppp.app.modular.system.dao.SendVinMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xyz.slppp.app.modular.system.model.SendVin">
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="vinvout" property="vinvout" jdbcType="INTEGER"/>
+		<result column="vintxid" property="vintxid" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		txid, `vinvout`, vintxid
+	</sql>
+
+<!--	<select id="findByToken" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`slppp` where token = #{token}
+	</select>-->
+
+	<insert id="insertSendVin" parameterType="com.xyz.slppp.app.modular.system.model.SendVin">
+		insert into send_vin
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="vinvout != null" >
+				`vinvout`,
+			</if>
+			<if test="vintxid != null" >
+				vintxid,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="vinvout != null" >
+				#{vinvout,jdbcType=INTEGER},
+			</if>
+			<if test="vintxid != null" >
+				#{vintxid,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

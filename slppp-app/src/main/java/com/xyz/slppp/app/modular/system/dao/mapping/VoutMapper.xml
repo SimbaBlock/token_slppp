@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.slppp.app.modular.system.dao.VoutMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xyz.slppp.app.modular.system.model.Vout">
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="value" property="value" jdbcType="DECIMAL"/>
+		<result column="n" property="n" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		txid, `value`, n
+	</sql>
+
+<!--	<select id="findByToken" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`slppp` where token = #{token}
+	</select>-->
+
+	<insert id="insertVout" parameterType="com.xyz.slppp.app.modular.system.model.Vout">
+		insert into vout
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="value != null" >
+				`value`,
+			</if>
+			<if test="n != null" >
+				n,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="value != null" >
+				#{value,jdbcType=DECIMAL},
+			</if>
+			<if test="n != null" >
+				#{n,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

@@ -1,0 +1,24 @@
+package com.xyz.slppp.app.modular.system.dao;
+
+import com.xyz.slppp.app.modular.system.model.TokenAssets;
+import org.apache.ibatis.annotations.Param;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.List;
+
+public interface TokenAssetsMapper {
+
+    int insertTokenAssets(TokenAssets tokenAssets);
+
+    List<TokenAssets> selectToken(@Param("tokenId") String tokenId, @Param("address") String address);
+
+    BigInteger selectAddressToken(@Param("tokenId") String tokenId, @Param("address") String address);
+
+    int selectAddressCount(String address);
+
+    TokenAssets findByTokenAssets(@Param("txid") String txid, @Param("vout") Integer vout);
+
+    BigInteger selectFromAddressToken(@Param("tokenId") String tokenId, @Param("address") String address);
+
+}
