@@ -21,4 +21,8 @@ public interface TokenAssetsMapper {
 
     BigInteger selectFromAddressToken(@Param("tokenId") String tokenId, @Param("address") String address);
 
+    List<TokenAssets> selectByTxid(@Param("txid") String txid);
+
+    BigInteger selectFAToken(@Param("txid")String txid, @Param("vout") Integer vout);
+
 }

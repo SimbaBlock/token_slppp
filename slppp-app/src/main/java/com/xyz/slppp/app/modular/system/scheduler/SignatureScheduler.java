@@ -15,6 +15,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -47,7 +49,10 @@ public class SignatureScheduler {
     @Autowired
     private TokenAssetsService tokenAssetsService;
 
-    @Scheduled(cron = "0/1 * * * * ?")
+    @Autowired
+    private TransactionService transactionService;
+
+    @Scheduled(cron = "0/5 * * * * ?")
     public void work() {
         self.start();
     }
@@ -64,86 +69,111 @@ public class SignatureScheduler {
 
                 String blockHash = Api.GetBlockHash(count);
                 JSONObject block = Api.GetBlock(blockHash);
+
                 JSONArray jsonArray = block.getJSONArray("tx");
-                if (jsonArray.size() > 1) {
 
-                    for (Object j : jsonArray) {
-
-                        addressHash(j);
-                        String txid = (String)j;
-
-                        JSONObject txHex = Api.GetRawTransaction(txid);
-
-                        JSONArray vouts = txHex.getJSONArray("vout");
-
-
-                        Map<Integer, String> map = vouts(vouts);
-
-                        for (Object v : vouts) {
-
-                            JSONObject vout = (JSONObject) v;
-                            JSONObject scriptPubKey = vout.getJSONObject("scriptPubKey");
-                            String open_hex = scriptPubKey.getString("hex");
-                            Integer n = vout.getInteger("n");
-
-                            if (open_hex.contains("76a914")) {
-                                String hex = open_hex.replaceFirst("76a914", "");
-                                String hexStr = hex.substring(0,40);
-                                String first = hex.replaceFirst(hexStr+"88ac", "");
-
-                                if ("".equals(first))
-                                    continue;
-
-                                String OP_RETURN = first.replaceFirst("6a06534c502b2b000101", "");
-
-                                if ("".equals(OP_RETURN))
-                                    continue;
-
-                                String content = OP_RETURN.substring(0, 2);
-
-
-                                Integer token_type = UnicodeUtil.decodeHEX(content);
-                                OP_RETURN = OP_RETURN.replaceFirst(content, "");
-
-                                if (token_type * 2 > OP_RETURN.length())
-                                    continue;
-
-                                String token_type_str = OP_RETURN.substring(0, token_type * 2);
-                                OP_RETURN = OP_RETURN.replaceFirst(token_type_str, "");
-
-                                if ("47454e45534953".equals(token_type_str)) {
-                                    String tokenid = UnicodeUtil.getSHA256(open_hex);
-                                    if (map.size() < 2)
-                                        continue;
-                                    decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n);
-
-                                } else if ("4d494e54".equals(token_type_str)) {
-
-                                    decodeMinttoken(OP_RETURN, map, hexStr, txid, n);
-
-                                } else if ("53454e44".equals(token_type_str)) {
-                                    JSONArray vins = txHex.getJSONArray("vin");
-                                    decodeSnedToken(OP_RETURN, hexStr, n, vins, txid);
-                                }
-
-                            }
-                        }
-                    }
-
-                } else {
-                    for (Object j : jsonArray) {
-                        addressHash(j);
-                    }
-                }
+                block(jsonArray);
                 count ++;
                 blockCountService.updateBlock(count);
 
+            } else {
+
+                List<String> txList = Api.GetRawMemPool();
+                JSONArray jsonArray = new JSONArray();
+                for (String tx: txList) {
+                    jsonArray.add(tx);
+                }
+                block(jsonArray);
             }
 
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+
+    public void block(JSONArray jsonArray) throws Exception {
+
+        if (jsonArray.size() > 1) {
+
+            for (Object j : jsonArray) {
+
+                String txid = (String)j;
+
+                List<TokenAssets> tokenAssetsList = tokenAssetsService.selectByTxid(txid);
+
+                if (tokenAssetsList != null && tokenAssetsList.size() > 0)
+                    continue;
+
+                addressHash(j);
+
+                JSONObject txHex = Api.GetRawTransaction(txid);
+
+                JSONArray vouts = txHex.getJSONArray("vout");
+
+                Map<Integer, String> map = vouts(vouts);
+
+                for (Object v : vouts) {
+
+                    JSONObject vout = (JSONObject) v;
+                    JSONObject scriptPubKey = vout.getJSONObject("scriptPubKey");
+                    String open_hex = scriptPubKey.getString("hex");
+                    Integer n = vout.getInteger("n");
+
+
+                    if (open_hex.contains("76a914")) {
+                        String hex = open_hex.replaceFirst("76a914", "");
+                        String hexStr = hex.substring(0,40);
+                        String first = hex.replaceFirst(hexStr+"88ac", "");
+
+                        if ("".equals(first))
+                            continue;
+
+                        String OP_RETURN = first.replaceFirst("6a06534c502b2b000101", "");
+
+                        if ("".equals(OP_RETURN))
+                            continue;
+
+                        String content = OP_RETURN.substring(0, 2);
+
+
+                        Integer token_type = UnicodeUtil.decodeHEX(content);
+                        OP_RETURN = OP_RETURN.replaceFirst(content, "");
+
+                        if (token_type * 2 > OP_RETURN.length())
+                            continue;
+
+                        String token_type_str = OP_RETURN.substring(0, token_type * 2);
+                        OP_RETURN = OP_RETURN.replaceFirst(token_type_str, "");
+
+                        if ("47454e45534953".equals(token_type_str)) {
+                            String tokenid = UnicodeUtil.getSHA256(open_hex);
+                            if (map.size() < 2)
+                                continue;
+                            decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n);
+
+                        } else if ("4d494e54".equals(token_type_str)) {
+
+                            decodeMinttoken(OP_RETURN, map, hexStr, txid, n);
+
+                        } else if ("53454e44".equals(token_type_str)) {
+                            JSONArray vins = txHex.getJSONArray("vin");
+                            decodeSnedToken(OP_RETURN, hexStr, n, vins, txid);
+                        }
+
+                    }
+                }
+            }
+
+        } else {
+            for (Object j : jsonArray) {
+                addressHash(j);
+            }
+        }
+
+
 
     }
 
@@ -231,7 +261,7 @@ public class SignatureScheduler {
         String initial_token_mint_quantity_str = content.substring(0, initial_token_mint_quantity * 2);
         BigInteger quantity = new BigInteger(initial_token_mint_quantity_str, 16);
 
-        if (quantity.compareTo(new BigInteger("0")) < 0|| quantity.compareTo(new BigInteger("9999999999999999")) > 0) {
+        if (quantity.compareTo(new BigInteger("0")) < 0|| quantity.compareTo(new BigInteger("18446744073709551999")) > 0) {
             // 超出范围
             return false;
         }
@@ -311,7 +341,7 @@ public class SignatureScheduler {
         String initial_token_mint_quantity_str = content.substring(0, initial_token_mint_quantity * 2);
         BigInteger quantity = new BigInteger(initial_token_mint_quantity_str, 16);
 
-        if (quantity.compareTo(new BigInteger("0")) < 0|| quantity.compareTo(new BigInteger("9999999999999999")) > 0) {
+        if (quantity.compareTo(new BigInteger("0")) < 0|| quantity.compareTo(new BigInteger("18446744073709551999")) > 0) {
             // 超出范围
             return false;
         }
@@ -421,10 +451,33 @@ public class SignatureScheduler {
 
         BigInteger quantity_int = new BigInteger(quantity_hex_str, 16);
 
-        if (quantity_int.compareTo(new BigInteger("0")) < 0|| quantity_int.compareTo(new BigInteger("9999999999999999")) > 0) {
+        if (quantity_int.compareTo(new BigInteger("0")) < 0|| quantity_int.compareTo(new BigInteger("18446744073709551999")) > 0) {
             // 超出范围
             return false;
         }
+        List<TokenAssets> assetsList = new ArrayList<>();
+        for (Object v : vins) {
+            JSONObject vin = (JSONObject) v;
+            String txid = vin.getString("txid");
+            Integer vout = vin.getInteger("vout");
+            TokenAssets assets = tokenAssetsService.findByTokenAssets(txid, vout);
+            if (assets != null)
+                assetsList.add(assets);
+        }
+
+        BigInteger newBig = new BigInteger("0");
+        if (assetsList != null && assetsList.size() > 0) {
+            for (TokenAssets tokenAssets : assetsList) {
+                BigInteger fromToken = tokenAssetsService.selectFAToken(tokenAssets.getTxid(), tokenAssets.getVout());
+                if (fromToken != null) {
+                    newBig = newBig.add(fromToken);
+                }
+            }
+        } else
+            return false;
+
+        if (newBig.compareTo(quantity_int) < 0)
+            return false;                               //钱不够，返回
 
 
         SlpSend slpSend = new SlpSend();
@@ -437,28 +490,18 @@ public class SignatureScheduler {
         slpSendService.insertSlpSend(slpSend);
 
 
+//        for (TokenAssets ta : assetsList) {
 
-        for (Object v : vins) {
-            JSONObject vin = (JSONObject) v;
-            String txid = vin.getString("txid");
-            Integer vout = vin.getInteger("vout");
+            TokenAssets tokenAssets = new TokenAssets();
+            tokenAssets.setAddress(toAddressHash);
+            tokenAssets.setTokenId(token_id_str);
+            tokenAssets.setTxid(tx);
+            tokenAssets.setVout(n);
+            tokenAssets.setToken(quantity_int);
+            tokenAssets.setFromAddress(assetsList.get(0).getAddress());
+            tokenAssetsService.insertTokenAssets(tokenAssets);
 
-            TokenAssets assets = tokenAssetsService.findByTokenAssets(txid, vout);
-
-            if (assets != null) {
-
-                TokenAssets tokenAssets = new TokenAssets();
-                tokenAssets.setAddress(assets.getAddress());
-                tokenAssets.setTokenId(token_id_str);
-                tokenAssets.setTxid(tx);
-                tokenAssets.setVout(n);
-                tokenAssets.setToken(quantity_int);
-                tokenAssets.setFromAddress(assets.getAddress());
-                tokenAssetsService.insertTokenAssets(tokenAssets);
-
-            }
-
-        }
+//        }
 
         return true;
 

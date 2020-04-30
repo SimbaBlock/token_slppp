@@ -37,6 +37,21 @@
 		`token_assets` where token_id = #{tokenId} and from_address = #{address}
 	</select>
 
+	<select id="selectFAToken" resultType="java.math.BigInteger">
+		SELECT
+			token
+		FROM
+		`token_assets` where txid = #{txid} and vout = #{vout}
+	</select>
+
+
+	<select id="selectByTxid" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`token_assets` where txid = #{txid}
+	</select>
+
 
 	<select id="findByTokenAssets" resultType="com.xyz.slppp.app.modular.system.model.TokenAssets">
 		SELECT

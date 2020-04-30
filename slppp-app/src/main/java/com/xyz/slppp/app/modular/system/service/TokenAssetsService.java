@@ -20,4 +20,7 @@ public interface TokenAssetsService {
 
     BigInteger selectFromAddressToken(String tokenId, String address);
 
+    List<TokenAssets> selectByTxid(String txid);
+
+    BigInteger selectFAToken(String txid, Integer vout);
 }

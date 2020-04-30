@@ -46,4 +46,14 @@ public class TokenAssetsServiceImpl implements TokenAssetsService {
         return tokenAssetsMapper.selectFromAddressToken(tokenId, address);
     }
 
+    @Override
+    public List<TokenAssets> selectByTxid(String txid) {
+        return tokenAssetsMapper.selectByTxid(txid);
+    }
+
+    @Override
+    public BigInteger selectFAToken(String txid, Integer vout) {
+        return tokenAssetsMapper.selectFAToken(txid, vout);
+    }
+
 }

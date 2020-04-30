@@ -73,6 +73,13 @@ public class ApiController {
 	@Autowired
 	private AddressHashLinkService addressHashLinkService;
 
+	@Autowired
+	private UtxoTokenService utxoTokenService;
+
+	@Autowired
+	private UtxoService utxoService;
+
+
 	@Value("${system-address}")
 	private String systemAddress;
 
@@ -96,7 +103,7 @@ public class ApiController {
 
 			String hex = JSONObject.getString("hex");
 
-			String txid = sendRawTransaction(hex);
+			String txid = Api.SendRawTransaction(hex);
 
 			return new JsonResult().addData("txid", txid);
 
@@ -158,8 +165,8 @@ public class ApiController {
 		String json = null;
 
 		try {
-//			 json = Api.SendRawTransaction(hex);
-			 json = "b5c30921ef188dd2907f0895c7de8a8cf85be71780491b940f3fc501aaca311f";
+			 json = Api.SendRawTransaction(hex);
+//			 json = "b5c30921ef188dd2907f0895c7de8a8cf85be71780491b940f3fc501aaca311f";
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -285,33 +292,6 @@ public class ApiController {
 
 	}
 
-
-/*	@ResponseBody
-	@RequestMapping("GetBlock")
-	public JSONObject GetBlock(String blockHash) throws Exception {
-
-		Block block = Api.GetBlock(blockHash);
-		JSONObject ob = new JSONObject();
-
-		ob.put("hash", block.hash());
-		ob.put("confirmations", block.confirmations());
-		ob.put("size", block.size());
-		ob.put("height", block.height());
-		ob.put("version", block.version());
-		ob.put("merkleRoot", block.merkleRoot());
-		ob.put("time", block.time());
-		ob.put("bits", block.bits());
-		ob.put("difficulty", block.difficulty());
-		ob.put("previousHash", block.previousHash());
-		ob.put("nextHash", block.nextHash());
-		ob.put("chainwork", block.chainwork());
-		ob.put("previous", block.previous());
-		ob.put("next", block.next());
-		ob.put("tx", block.tx());
-
-		return ob;
-
-	}*/
 
 	@ResponseBody
 	@RequestMapping("GetBlockHash")
@@ -802,7 +782,7 @@ public class ApiController {
 	 */
 	@ResponseBody
 	@RequestMapping("kyc")
-	public JsonResult addressKYC(@RequestBody String body) {
+	public JsonResult addressKYC(@RequestBody String body) throws Exception {
 
 		JSONObject jsonData = (JSONObject) JSONObject.parse(body);
 		String address = jsonData.getString("address");
@@ -819,6 +799,15 @@ public class ApiController {
 		KycAddress.setName(name);
 		KycAddress.setIdNumber(IDnumber);
 		kycAddressService.insertKycAddress(KycAddress);
+
+		String addressHash = Api.ValidateAddress(address).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
+
+		AddressHashLink addressHashLink = new AddressHashLink();
+		addressHashLink.setAddressHash(addressHash);
+		addressHashLink.setAddress(address);
+
+		addressHashLinkService.insertAddressHashLink(addressHashLink);
+
 
 		return new JsonResult();
 
@@ -1270,19 +1259,10 @@ public class ApiController {
 	@RequestMapping("getUtxo")
 	public JsonResult getUtxoApi(String address) throws Exception {
 
-		JSONArray jsons = new JSONArray();
-		JSONArray js = new JSONArray();
-		js.add(address);
-		js.add(-1);
-		jsons.add(js);
-		JSONObject jsonObject = getUxto(jsons);
-		JSONArray uxs = jsonObject.getJSONArray(address);
+		List<Utxo> utxoList = utxoService.findByAddress(address);
 
-		if (uxs == null) {
-			return new JsonResult().addData("utxo","");
-		} else {
-			return new JsonResult().addData("utxo",uxs.toJSONString());
-		}
+		return new JsonResult().addData("utxo",utxoList);
+
 
 	}
 
@@ -1290,17 +1270,9 @@ public class ApiController {
 	@RequestMapping("getTokenUtxo")
 	public JsonResult getTokenUtxo(String address) throws Exception {
 
+		List<UtxoToken> utxoTokenList = utxoTokenService.findByAddress(address);
 
-		JSONArray js = new JSONArray();
-		js.add(address);
-
-		JSONArray jsonObject = getTokenUtxo(js);
-
-		if (jsonObject == null) {
-			return new JsonResult().addData("utxo","");
-		} else {
-			return new JsonResult().addData("utxo",jsonObject.toJSONString());
-		}
+		return new JsonResult().addData("utxo",utxoTokenList);
 
 	}
 

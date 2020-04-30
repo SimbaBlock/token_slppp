@@ -83,15 +83,7 @@ public class MultiDataSourceConfig {
         return dataSource;
     }
 
-    /**
-     * 多数据源，第二个数据源
-     */
-//    private DruidDataSource bizDataSource(DruidProperties druidProperties, MutiDataSourceProperties mutiDataSourceProperties) {
-//        DruidDataSource dataSource = new DruidDataSource();
-//        druidProperties.config(dataSource);
-//        mutiDataSourceProperties.config(dataSource);
-//        return dataSource;
-//    }
+
     private DruidDataSource bizDataSource(DruidProperties druidProperties, MutiDataSourceProperties mutiDataSourceProperties) {
         DruidDataSource dataSource = new DruidDataSource();
         druidProperties.config(dataSource);
