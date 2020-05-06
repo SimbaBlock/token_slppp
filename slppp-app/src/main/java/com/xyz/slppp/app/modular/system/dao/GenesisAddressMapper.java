@@ -11,4 +11,6 @@ public interface GenesisAddressMapper {
 
     int updateGensisAddress(GenesisAddress genesisAddress);
 
+    GenesisAddress findRaiseAddress(String raiseAddress);
+
 }

@@ -1,11 +1,12 @@
 package com.xyz.slppp.app.modular.system.dao;
 
+import com.xyz.slppp.app.modular.api.vo.TokenHistory;
 import com.xyz.slppp.app.modular.system.model.TokenAssets;
 import org.apache.ibatis.annotations.Param;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public interface TokenAssetsMapper {
 
@@ -24,5 +25,9 @@ public interface TokenAssetsMapper {
     List<TokenAssets> selectByTxid(@Param("txid") String txid);
 
     BigInteger selectFAToken(@Param("txid")String txid, @Param("vout") Integer vout);
+
+    List<TokenHistory> selectHistory(Map<String, Object> query);
+
+    Long selectHistoryCount(Map<String, Object> query);
 
 }

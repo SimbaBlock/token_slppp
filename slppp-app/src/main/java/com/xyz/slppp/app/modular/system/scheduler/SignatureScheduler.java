@@ -65,7 +65,7 @@ public class SignatureScheduler {
             Integer count = blockCountService.findBlockCount();
             Integer json = Api.GetBlockCount();
 
-            if (count < json) {
+            if (count < json + 1) {
 
                 String blockHash = Api.GetBlockHash(count);
                 JSONObject block = Api.GetBlock(blockHash);
@@ -96,7 +96,7 @@ public class SignatureScheduler {
 
     public void block(JSONArray jsonArray) throws Exception {
 
-        if (jsonArray.size() > 1) {
+        if (jsonArray.size() > 0) {
 
             for (Object j : jsonArray) {
 
@@ -112,6 +112,7 @@ public class SignatureScheduler {
                 JSONObject txHex = Api.GetRawTransaction(txid);
 
                 JSONArray vouts = txHex.getJSONArray("vout");
+                Long time = txHex.getLong("time");
 
                 Map<Integer, String> map = vouts(vouts);
 
@@ -131,7 +132,7 @@ public class SignatureScheduler {
                         if ("".equals(first))
                             continue;
 
-                        String OP_RETURN = first.replaceFirst("6a06534c502b2b000101", "");
+                        String OP_RETURN = first.replaceFirst("6a06534c502b2b00020201", "");
 
                         if ("".equals(OP_RETURN))
                             continue;
@@ -152,15 +153,15 @@ public class SignatureScheduler {
                             String tokenid = UnicodeUtil.getSHA256(open_hex);
                             if (map.size() < 2)
                                 continue;
-                            decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n);
+                            decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n, time);
 
                         } else if ("4d494e54".equals(token_type_str)) {
 
-                            decodeMinttoken(OP_RETURN, map, hexStr, txid, n);
+                            decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time);
 
                         } else if ("53454e44".equals(token_type_str)) {
                             JSONArray vins = txHex.getJSONArray("vin");
-                            decodeSnedToken(OP_RETURN, hexStr, n, vins, txid);
+                            decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time);
                         }
 
                     }
@@ -179,7 +180,7 @@ public class SignatureScheduler {
 
 
     //解析发行
-    public boolean decodeGenesistoken(String content, Map<Integer, String> map, String hexStr, String tokenId, String txid, Integer n) {
+    public boolean decodeGenesistoken(String content, Map<Integer, String> map, String hexStr, String tokenId, String txid, Integer n, Long time) {
 
         String token_ticker_hex = content.substring(0, 2);
         Integer token_ticker = UnicodeUtil.decodeHEX(token_ticker_hex);
@@ -248,7 +249,7 @@ public class SignatureScheduler {
         content = content.replaceFirst(mint_baton_vout_hex, "");
         String mint_baton_vout_str = content.substring(0, mint_baton_vout * 2);
 
-        if (mint_baton_vout < 2 || mint_baton_vout > 255) {
+        if (mint_baton_vout < 1 || mint_baton_vout > 255) {
             // 超出范围
             return false;
         }
@@ -294,6 +295,7 @@ public class SignatureScheduler {
         genesisAddress.setIssueAddress(hexStr);
         genesisAddress.setRaiseAddress(mintAddress);
         genesisAddress.setIssueVout(n);
+        genesisAddress.setRaiseTxid(txid);
         genesisAddressService.insertGenesisAddress(genesisAddress);
 
 
@@ -302,8 +304,9 @@ public class SignatureScheduler {
         tokenAssets.setTokenId(tokenId);
         tokenAssets.setTxid(txid);
         tokenAssets.setVout(n);
-
+        tokenAssets.setTime(time);
         tokenAssets.setToken(quantity);
+        tokenAssets.setStatus(0);
 
         tokenAssetsService.insertTokenAssets(tokenAssets);
 
@@ -312,7 +315,7 @@ public class SignatureScheduler {
     }
 
     // 解析增发
-    public boolean decodeMinttoken(String content, Map<Integer, String> map, String hexStr, String tx, Integer n) {
+    public boolean decodeMinttoken(String content, Map<Integer, String> map, String hexStr, String tx, Integer n, Long time) {
 
         String token_id_hex = content.substring(0, 2);
         Integer token_id = UnicodeUtil.decodeHEX(token_id_hex);
@@ -327,7 +330,7 @@ public class SignatureScheduler {
         content = content.replaceFirst(mint_baton_vout_hex, "");
         String mint_baton_vout_str = content.substring(0, mint_baton_vout * 2);		// vout
 
-        if (mint_baton_vout < 2 || mint_baton_vout > 255) {
+        if (mint_baton_vout < 1 || mint_baton_vout > 255) {
             // 超出范围
             return false;
         }
@@ -354,12 +357,22 @@ public class SignatureScheduler {
 
         String mintAddress = map.get(mintVout).replaceFirst("76a914","").replaceFirst("88ac","");   //增发权限地址
 
+        Slp slp = slpService.findByTokenId(token_id_str);
+
+        if (slp == null)
+            return false;   // 不存在token
+
+
+        GenesisAddress genesisaddress = genesisAddressService.findRaiseAddress(hexStr);
+        if (genesisaddress == null)
+            return false;   // 无权限增发
+
         SlpMint slpMint = new SlpMint();
         slpMint.setTransactionType("mint");
         slpMint.setTokenId(token_id_str);
         slpMint.setMintBatonVout(mintVout);
         slpMint.setAdditionalTokenQuantity(quantity.toString());
-        slpMint.setAddress(hexStr);
+        slpMint.setAddress(hexStr);         //增发地址
         slpMint.setMinterAddress(mintAddress);
         slpMintService.insertSlpMint(slpMint);
 
@@ -375,8 +388,9 @@ public class SignatureScheduler {
         tokenAssets.setTokenId(token_id_str);
         tokenAssets.setTxid(tx);
         tokenAssets.setVout(n);
+        tokenAssets.setTime(time);
         tokenAssets.setToken(quantity);
-
+        tokenAssets.setStatus(1);
         tokenAssetsService.insertTokenAssets(tokenAssets);
 
         return true;
@@ -432,7 +446,7 @@ public class SignatureScheduler {
     }
 
     //解析发送
-    public boolean decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx) {
+    public boolean decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx, Long time) {
 
         String token_id_hex = content.substring(0, 2);
 
@@ -499,6 +513,8 @@ public class SignatureScheduler {
             tokenAssets.setVout(n);
             tokenAssets.setToken(quantity_int);
             tokenAssets.setFromAddress(assetsList.get(0).getAddress());
+            tokenAssets.setTime(time);
+            tokenAssets.setStatus(2);
             tokenAssetsService.insertTokenAssets(tokenAssets);
 
 //        }

@@ -1,5 +1,6 @@
 package com.xyz.slppp.app.modular.system.service.impl;
 
+import com.xyz.slppp.app.modular.api.vo.TokenHistory;
 import com.xyz.slppp.app.modular.system.dao.TokenAssetsMapper;
 import com.xyz.slppp.app.modular.system.model.TokenAssets;
 import com.xyz.slppp.app.modular.system.service.TokenAssetsService;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TokenAssetsServiceImpl implements TokenAssetsService {
@@ -54,6 +56,16 @@ public class TokenAssetsServiceImpl implements TokenAssetsService {
     @Override
     public BigInteger selectFAToken(String txid, Integer vout) {
         return tokenAssetsMapper.selectFAToken(txid, vout);
+    }
+
+    @Override
+    public List<TokenHistory> selectHistory(Map<String, Object> query) {
+        return tokenAssetsMapper.selectHistory(query);
+    }
+
+    @Override
+    public Long selectHistoryCount(Map<String, Object> query) {
+        return tokenAssetsMapper.selectHistoryCount(query);
     }
 
 }

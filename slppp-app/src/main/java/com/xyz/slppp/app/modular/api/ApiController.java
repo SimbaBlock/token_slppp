@@ -10,6 +10,7 @@ import com.xyz.slppp.app.core.rpc.TxOutputDto;
 import com.xyz.slppp.app.core.util.HttpUtil;
 import com.xyz.slppp.app.core.util.JsonResult;
 import com.xyz.slppp.app.core.util.UnicodeUtil;
+import com.xyz.slppp.app.modular.api.vo.TokenHistory;
 import com.xyz.slppp.app.modular.system.model.*;
 import com.xyz.slppp.app.modular.system.service.*;
 import org.apache.commons.collections.map.HashedMap;
@@ -1275,6 +1276,39 @@ public class ApiController {
 		return new JsonResult().addData("utxo",utxoTokenList);
 
 	}
+
+	@ResponseBody
+	@RequestMapping("getTokenHistory")
+	public JsonResult getTokenHistory(String address, Integer page) {
+
+		page = page - 1;
+		Integer limit = 10;
+		Integer offset = page * limit;
+
+		AddressHashLink addressHashLink = addressHashLinkService.findByAddress(address);
+
+		if (addressHashLink == null)
+			return new JsonResult(BizExceptionEnum.ADDRESS_HASH_ERROR.getCode(), BizExceptionEnum.ADDRESS_HASH_ERROR.getMessage());
+
+		Map<String,Object> params = Maps.newHashMap();
+		params.put("offset",offset);
+		params.put("limit",limit);
+		params.put("address",addressHashLink.getAddressHash());
+
+		List<TokenHistory> tokenHistoryList = tokenAssetsService.selectHistory(params);
+		long total = tokenAssetsService.selectHistoryCount(params);
+
+		long size;
+		if (total % limit == 0){
+			size = total/limit;
+		} else {
+			size = total/limit + 1;
+		}
+
+		return new JsonResult().addData("history",tokenHistoryList).addData("total",String.valueOf(total)).addData("page",String.valueOf(size));
+
+	}
+
 
 
 

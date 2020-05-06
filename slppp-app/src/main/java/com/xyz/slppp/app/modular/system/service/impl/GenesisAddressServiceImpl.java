@@ -29,4 +29,9 @@ public class GenesisAddressServiceImpl implements GenesisAddressService {
         return genesisAddressMapper.updateGensisAddress(genesisAddress);
     }
 
+    @Override
+    public GenesisAddress findRaiseAddress(String raiseAddress) {
+        return genesisAddressMapper.findRaiseAddress(raiseAddress);
+    }
+
 }

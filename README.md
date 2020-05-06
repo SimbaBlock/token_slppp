@@ -99,49 +99,50 @@
         "msg": ""
     }
 
-#查询所有token列表:
+#查询地址历史交易记录:
 
-    URL:/rest/Api/queryToken
+    URL:/rest/Api/getTokenHistory
     传参：
-	    page		Integer     
-	  
-    返回结果：
-    {
-    	"code":200,
-    	"data":{
-    		"total":"2",
-    		"page":"1",
-    		"list":[
-    			{
-    				"initIssueAddress":"12SL22kcHRLEcscSBzD3KdALhWZLaUk25d",
-    				"initialTokenMintQuantity":"1000000000",
-    				"mintBatonVout":2,
-    				"originalAddress":"17vVkTTvyMGjSma1wyTdyofn5iQu6SbHXn",
-    				"tokenDecimal":8,
-    				"tokenDocumentHash":"122dfqwcq",
-    				"tokenDocumentUrl":"asfjeimndew",
-    				"tokenName":"youafe",
-    				"tokenTicker":"yuio",
-    				"transactionType":"GENESIS",
-    				"txid":"c368a2bf7ed51fe99f0c0f7609ecabea04ee61b7f09c93271782968dd5cc9463"
-    			},
-    			{
-    				"initIssueAddress":"1Cuk5j8B81pvvCb9BgFnT9JewwDZvNwRN4",
-    				"initialTokenMintQuantity":"100000000000000000",
-    				"mintBatonVout":2,
-    				"originalAddress":"1D1CCx6Gskto3eFC7u7ydbngM8iGwwQRcv",
-    				"tokenDecimal":8,
-    				"tokenDocumentHash":"hashhahahahahahahahahahahahahah",
-    				"tokenDocumentUrl":"http://www.baidu.com",
-    				"tokenName":"BTC is nice",
-    				"tokenTicker":"BTC",
-    				"transactionType":"GENESIS",
-    				"txid":"f09ec348b232ce8fc8d7505d150c3960946daf43625233b673454dcc6e463275"
-    			}
-    		]
-    	},
-    	"msg":""
-    }
+	    address		string
+
+    返回结果：   （status (0：发行，1：增发，2：交易)）  （type(2,打出去的钱 1,收到的钱)）
+   {
+   	"code":200,
+   	"data":{
+   		"total":"23",
+   		"history":[
+   			{
+   				"fromAddress":"602c8763be74d22f96c43d3f3f965171892df641",
+   				"status":1,
+   				"time":1588654538,
+   				"toAddress":"c079c08dd91583a5a48786f3b9da08893b3687ca",
+   				"token":100000000000000,
+   				"type":1
+   			},
+   			{
+   				"fromAddress":"602c8763be74d22f96c43d3f3f965171892df641",
+   				"status":1,
+   				"time":1588654538,
+   				"toAddress":"c079c08dd91583a5a48786f3b9da08893b3687ca",
+   				"token":1000000000000000,
+   				"type":1
+   			},
+   			{
+   				"fromAddress":"602c8763be74d22f96c43d3f3f965171892df641",
+   				"status":1,
+   				"time":1588654538,
+   				"toAddress":"c079c08dd91583a5a48786f3b9da08893b3687ca",
+   				"token":100000000000000,
+   				"type":1
+   			}
+   		],
+   		"page":"3"
+   	},
+   	"msg":""
+   }
+
+
+
 
 
 

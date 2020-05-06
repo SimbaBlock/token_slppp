@@ -1,10 +1,12 @@
 package com.xyz.slppp.app.modular.system.service;
 
+import com.xyz.slppp.app.modular.api.vo.TokenHistory;
 import com.xyz.slppp.app.modular.system.model.TokenAssets;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public interface TokenAssetsService {
 
@@ -23,4 +25,8 @@ public interface TokenAssetsService {
     List<TokenAssets> selectByTxid(String txid);
 
     BigInteger selectFAToken(String txid, Integer vout);
+
+    List<TokenHistory> selectHistory(Map<String, Object> query);
+
+    Long selectHistoryCount(Map<String, Object> query);
 }

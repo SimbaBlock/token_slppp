@@ -8,4 +8,6 @@ public interface AddressHashLinkService {
 
     AddressHashLink findByAddress(String address);
 
+    AddressHashLink findByAddressHash(String addressHash);
+
 }

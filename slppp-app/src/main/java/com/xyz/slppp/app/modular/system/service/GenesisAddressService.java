@@ -10,4 +10,7 @@ public interface GenesisAddressService {
 
     int updateGensisAddress(GenesisAddress genesisAddress);
 
+    GenesisAddress findRaiseAddress(String raiseAddress);
+
+
 }

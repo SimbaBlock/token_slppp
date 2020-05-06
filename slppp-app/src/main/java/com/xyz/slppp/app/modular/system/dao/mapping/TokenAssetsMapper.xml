@@ -10,10 +10,12 @@
 		<result column="txid" property="txid" jdbcType="VARCHAR"/>
 		<result column="vout" property="vout" jdbcType="INTEGER"/>
 		<result column="from_address" property="fromAddress" jdbcType="VARCHAR"/>
+		<result column="time" property="time" jdbcType="BIGINT"/>
+		<result column="status" property="status" jdbcType="INTEGER"/>
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		token_id, address, token, txid, vout, from_address
+		token_id, address, token, txid, vout, from_address, `time`, status
 	</sql>
 
 	<select id="selectToken" resultMap="BaseResultMap">
@@ -53,6 +55,22 @@
 	</select>
 
 
+	<select id="selectHistory" resultType="com.xyz.slppp.app.modular.api.vo.TokenHistory">
+		SELECT b.toAddress, ahla.address as fromAddress, b.token, b.time,b.`status`,b.type FROM (SELECT ahl.address as toAddress, token, a.from_address as fromAddress, `time`, status, type from
+ 		(SELECT *,1 as type FROM token_assets WHERE address = #{address}
+			UNION
+		SELECT *,2 as type FROM token_assets WHERE from_address = #{address}) a,
+   			address_hash_link ahl
+    	WHERE a.address = ahl.address_hash) b left JOIN address_hash_link ahla ON ahla.address_hash = b.fromAddress ORDER BY `time` DESC limit #{offset},#{limit}
+	</select>
+
+	<select id="selectHistoryCount" resultType="long">
+		SELECT count(0) from (SELECT *,1 as type FROM token_assets WHERE address = #{address}
+		UNION
+		SELECT *,2 as type FROM token_assets WHERE from_address = #{address}) a
+	</select>
+
+
 	<select id="findByTokenAssets" resultType="com.xyz.slppp.app.modular.system.model.TokenAssets">
 		SELECT
 			*
@@ -81,6 +99,12 @@
 			<if test="fromAddress != null" >
 				`from_address`,
 			</if>
+			<if test="time != null" >
+				`time`,
+			</if>
+			<if test="status != null" >
+				`status`,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="tokenId != null" >
@@ -100,6 +124,12 @@
 			</if>
 			<if test="fromAddress != null" >
 				#{fromAddress,jdbcType=VARCHAR},
+			</if>
+			<if test="time != null" >
+				#{time,jdbcType=BIGINT},
+			</if>
+			<if test="status != null" >
+				#{status,jdbcType=INTEGER},
 			</if>
 		</trim>
 	</insert>

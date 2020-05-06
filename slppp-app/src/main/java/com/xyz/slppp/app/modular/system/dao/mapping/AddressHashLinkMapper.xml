@@ -19,6 +19,13 @@
 		`address_hash_link` where address = #{address}
 	</select>
 
+	<select id="findByAddressHash" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`address_hash_link` where address_hash = #{addressHash}
+	</select>
+
 	<insert id="insertAddressHashLink" parameterType="com.xyz.slppp.app.modular.system.model.AddressHashLink">
 		insert into address_hash_link
 		<trim prefix="(" suffix=")" suffixOverrides="," >

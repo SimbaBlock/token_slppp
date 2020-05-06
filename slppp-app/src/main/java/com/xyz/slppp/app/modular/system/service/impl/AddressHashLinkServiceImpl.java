@@ -23,4 +23,9 @@ public class AddressHashLinkServiceImpl implements AddressHashLinkService {
         return addressHashLinkMapper.findByAddress(address);
     }
 
+    @Override
+    public AddressHashLink findByAddressHash(String addressHash) {
+        return addressHashLinkMapper.findByAddressHash(addressHash);
+    }
+
 }
