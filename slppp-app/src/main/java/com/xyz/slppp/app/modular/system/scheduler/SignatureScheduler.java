@@ -125,7 +125,12 @@ public class SignatureScheduler {
                 Map<Integer, String> map = vouts(vouts);
 
                 boolean flag = false;
+                Map<Integer, BigInteger> hashmap = new HashedMap();
+                hashmap.put(1,new BigInteger("0"));
 
+                List<SlpSend> SlpSendList = new ArrayList<>();
+                List<TokenAssets> TokenAssetsList = new ArrayList<>();
+                boolean sendFlag = false;
                 for (Object v : vouts) {
 
                     JSONObject vout = (JSONObject) v;
@@ -181,14 +186,29 @@ public class SignatureScheduler {
 
                         } else if ("53454e44".equals(token_type_str)) {
 
-                            boolean bl = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time);
+                            sendFlag = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time, hashmap, SlpSendList, TokenAssetsList);
 
-                            if (bl)
-                                flag = true;
+//                            if (bl)
+//                                flag = true;
 
                         }
                     }
 
+                }
+
+                if (sendFlag && hashmap.get(0).compareTo(hashmap.get(1)) >=0) {
+                        flag = true;
+                        if (SlpSendList != null) {
+                            for (SlpSend s : SlpSendList) {
+                                slpSendService.insertSlpSend(s);
+                            }
+                        }
+
+                        if (TokenAssetsList != null) {
+                            for (TokenAssets t : TokenAssetsList) {
+                                tokenAssetsService.insertTokenAssets(t);
+                            }
+                        }
                 }
 
                 if (!flag && tokenAssets != null) {
@@ -461,13 +481,19 @@ public class SignatureScheduler {
 
     }
 
-    public boolean mintVins(JSONArray vins) {
+    public boolean mintVins(JSONArray vins) throws Exception {
+
 
         for (Object v: vins) {
 
             JSONObject vin = (JSONObject) v;
 
-            GenesisAddress genesisAddress = genesisAddressService.findByRaiseTxidAndRaiseVout(vin.getString("txid"), vin.getInteger("vout"));
+            JSONObject json = Api.GetRawTransaction(vin.getString("txid"));
+            JSONArray vout = json.getJSONArray("vout");
+            JSONObject vv = vout.getJSONObject(vin.getInteger("vout"));
+            String addressHash = vv.getJSONObject("scriptPubKey").getString("hex").replaceFirst("76a914","").replaceFirst("88ac","");
+
+            GenesisAddress genesisAddress = genesisAddressService.findRaiseAddress(addressHash);
 
             if (genesisAddress != null)
                 return true;
@@ -484,7 +510,7 @@ public class SignatureScheduler {
 
             JSONObject vin = (JSONObject) v;
 
-            TokenAssets tokenAssets = tokenAssetsService.findByTokenAssetsStatus(vin.getString("txid"), vin.getInteger("vout"), 2);
+            TokenAssets tokenAssets = tokenAssetsService.findByTokenAssetsStatus(vin.getString("txid"), vin.getInteger("vout"), 3); // 状态不为3
 
             if (tokenAssets != null)
                 return tokenAssets;
@@ -527,7 +553,10 @@ public class SignatureScheduler {
     }
 
     //解析发送
-    public boolean decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx, Long time) {
+    public boolean decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx, Long time, Map<Integer, BigInteger> hashmap, List<SlpSend> SlpSendList, List<TokenAssets> TokenAssetsList) {
+
+        if ("9f8907667919c1746b23fee959782c1b4d4f34849fd50988ff7c7db17ce22a4d".equals(tx))
+            System.out.println("asdasdasdsa");
 
         String token_id_hex = content.substring(0, 2);
 
@@ -560,6 +589,7 @@ public class SignatureScheduler {
                 assetsList.add(assets);
         }
 
+
         BigInteger newBig = new BigInteger("0");
         if (assetsList != null && assetsList.size() > 0) {
             for (TokenAssets tokenAssets : assetsList) {
@@ -571,6 +601,10 @@ public class SignatureScheduler {
         } else
             return false;
 
+        hashmap.put(0,newBig);          //vin的所有钱
+        BigInteger voutBig = hashmap.get(1);
+        hashmap.put(1, voutBig.add(quantity_int));
+
         if (newBig.compareTo(quantity_int) < 0)
             return false;                               //钱不够，返回
 
@@ -581,11 +615,11 @@ public class SignatureScheduler {
         slpSend.setVout(n);
         slpSend.setAddress(toAddressHash);                  // 向这个地址打钱
         slpSend.setTxid(tx);
+        SlpSendList.add(slpSend);
 
-        slpSendService.insertSlpSend(slpSend);
+//        slpSendService.insertSlpSend(slpSend);
 
 
-//        for (TokenAssets ta : assetsList) {
         String fromAddress = assetsList.get(0).getAddress();
         TokenAssets tokenAssets = new TokenAssets();
 
@@ -603,9 +637,11 @@ public class SignatureScheduler {
         tokenAssets.setFromAddress(assetsList.get(0).getAddress());
         tokenAssets.setTime(new Date().getTime());
 
-        tokenAssetsService.insertTokenAssets(tokenAssets);
+        TokenAssetsList.add(tokenAssets);
 
-//        }
+//        tokenAssetsService.insertTokenAssets(tokenAssets);
+
+
 
         return true;
 
