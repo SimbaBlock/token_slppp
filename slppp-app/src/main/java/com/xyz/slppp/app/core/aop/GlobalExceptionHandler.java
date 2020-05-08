@@ -45,8 +45,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public JsonResult invalidBitcoinAddress(XsvException.InvalidBitcoinAddressException e) {
-        log.error("地址无效：", e);
-        return new JsonResult(BizExceptionEnum.INVALID_BITCOIN_ADDRESS_ERROR.getCode(), BizExceptionEnum.INVALID_BITCOIN_ADDRESS_ERROR.getMessage());
+        if (e.getCode() == -5)
+             return new JsonResult(BizExceptionEnum.INVALID_BITCOIN_ADDRESS_ERROR.getCode(), BizExceptionEnum.INVALID_BITCOIN_ADDRESS_ERROR.getMessage());
+        else
+            return new JsonResult(BizExceptionEnum.MISSING_INPUTS_ERROR.getCode(), BizExceptionEnum.MISSING_INPUTS_ERROR.getMessage());
     }
 
     @ExceptionHandler(ParamException.ParamLengthException.class)

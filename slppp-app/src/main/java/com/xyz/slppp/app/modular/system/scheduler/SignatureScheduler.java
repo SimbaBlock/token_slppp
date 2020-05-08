@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +52,9 @@ public class SignatureScheduler {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private TokenDestructionService tokenDestructionService;
 
     @Scheduled(cron = "0/5 * * * * ?")
     public void work() {
@@ -100,7 +104,7 @@ public class SignatureScheduler {
 
             for (Object j : jsonArray) {
 
-                String txid = (String)j;
+                String txid = (String) j;
 
                 List<TokenAssets> tokenAssetsList = tokenAssetsService.selectByTxid(txid);
 
@@ -112,9 +116,15 @@ public class SignatureScheduler {
                 JSONObject txHex = Api.GetRawTransaction(txid);
 
                 JSONArray vouts = txHex.getJSONArray("vout");
+                JSONArray vins = txHex.getJSONArray("vin");
+                TokenAssets tokenAssets = vins(vins);
+
+
                 Long time = txHex.getLong("time");
 
                 Map<Integer, String> map = vouts(vouts);
+
+                boolean flag = false;
 
                 for (Object v : vouts) {
 
@@ -126,11 +136,11 @@ public class SignatureScheduler {
 
                     if (open_hex.contains("76a914")) {
                         String hex = open_hex.replaceFirst("76a914", "");
-                        String hexStr = hex.substring(0,40);
-                        String first = hex.replaceFirst(hexStr+"88ac", "");
+                        String hexStr = hex.substring(0, 40);
+                        String first = hex.replaceFirst(hexStr + "88ac", "");
 
                         if ("".equals(first))
-                            continue;
+                                continue;
 
                         String OP_RETURN = first.replaceFirst("6a06534c502b2b00020201", "");
 
@@ -151,22 +161,56 @@ public class SignatureScheduler {
 
                         if ("47454e45534953".equals(token_type_str)) {
                             String tokenid = UnicodeUtil.getSHA256(open_hex);
-                            if (map.size() < 2)
-                                continue;
-                            decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n, time);
+//                               if (map.size() < 2)
+//                                   continue;
+
+                            boolean bl = decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n, time);
+
+                            if (bl)
+                                flag = true;
 
                         } else if ("4d494e54".equals(token_type_str)) {
 
-                            decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time);
+                            boolean f = mintVins(vins);         //判断有没有增发权限
+
+                            if (f) {
+                                boolean bl = decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time);
+                                if (bl)
+                                    flag = true;
+                            }
 
                         } else if ("53454e44".equals(token_type_str)) {
-                            JSONArray vins = txHex.getJSONArray("vin");
-                            decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time);
-                        }
 
+                            boolean bl = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time);
+
+                            if (bl)
+                                flag = true;
+
+                        }
                     }
+
                 }
+
+                if (!flag && tokenAssets != null) {
+
+                    TokenDestruction tokenDestruction = new TokenDestruction();
+                    tokenDestruction.setAddress(tokenAssets.getAddress());
+                    tokenDestruction.setTxid(txid);
+                    tokenDestruction.setN(tokenAssets.getVout());
+                    tokenDestructionService.insertTokenDestruction(tokenDestruction);
+                    TokenAssets update = new TokenAssets();
+                    update.setTokenId(tokenAssets.getTokenId());
+                    update.setStatus(3);
+                    update.setTxid(txid);
+                    update.setTime(new Date().getTime());
+                    update.setToken(tokenAssets.getToken());
+                    update.setAddress(tokenAssets.getAddress());
+                    tokenAssetsService.insertTokenAssets(update);
+
+                }
+
             }
+
 
         } else {
             for (Object j : jsonArray) {
@@ -177,6 +221,7 @@ public class SignatureScheduler {
 
 
     }
+
 
 
     //解析发行
@@ -304,7 +349,7 @@ public class SignatureScheduler {
         tokenAssets.setTokenId(tokenId);
         tokenAssets.setTxid(txid);
         tokenAssets.setVout(n);
-        tokenAssets.setTime(time);
+        tokenAssets.setTime(new Date().getTime());
         tokenAssets.setToken(quantity);
         tokenAssets.setStatus(0);
 
@@ -363,9 +408,9 @@ public class SignatureScheduler {
             return false;   // 不存在token
 
 
-        GenesisAddress genesisaddress = genesisAddressService.findRaiseAddress(hexStr);
-        if (genesisaddress == null)
-            return false;   // 无权限增发
+//        GenesisAddress genesisaddress = genesisAddressService.findRaiseAddress(hexStr);
+//        if (genesisaddress == null)
+//            return false;   // 无权限增发
 
         SlpMint slpMint = new SlpMint();
         slpMint.setTransactionType("mint");
@@ -380,6 +425,7 @@ public class SignatureScheduler {
         genesisAddress.setRaiseAddress(mintAddress);
         genesisAddress.setTxid(token_id_str);
         genesisAddress.setRaiseVout(mintVout);
+        genesisAddress.setRaiseTxid(tx);
         genesisAddressService.updateGensisAddress(genesisAddress);
 
 
@@ -388,7 +434,7 @@ public class SignatureScheduler {
         tokenAssets.setTokenId(token_id_str);
         tokenAssets.setTxid(tx);
         tokenAssets.setVout(n);
-        tokenAssets.setTime(time);
+        tokenAssets.setTime(new Date().getTime());
         tokenAssets.setToken(quantity);
         tokenAssets.setStatus(1);
         tokenAssetsService.insertTokenAssets(tokenAssets);
@@ -414,6 +460,41 @@ public class SignatureScheduler {
         return map;
 
     }
+
+    public boolean mintVins(JSONArray vins) {
+
+        for (Object v: vins) {
+
+            JSONObject vin = (JSONObject) v;
+
+            GenesisAddress genesisAddress = genesisAddressService.findByRaiseTxidAndRaiseVout(vin.getString("txid"), vin.getInteger("vout"));
+
+            if (genesisAddress != null)
+                return true;
+
+        }
+
+        return false;
+
+    }
+
+    public TokenAssets vins(JSONArray vins) {
+
+        for (Object v: vins) {
+
+            JSONObject vin = (JSONObject) v;
+
+            TokenAssets tokenAssets = tokenAssetsService.findByTokenAssetsStatus(vin.getString("txid"), vin.getInteger("vout"), 2);
+
+            if (tokenAssets != null)
+                return tokenAssets;
+
+        }
+
+        return null;
+
+    }
+
 
     public void addressHash(Object j) throws Exception {
 
@@ -505,17 +586,24 @@ public class SignatureScheduler {
 
 
 //        for (TokenAssets ta : assetsList) {
+        String fromAddress = assetsList.get(0).getAddress();
+        TokenAssets tokenAssets = new TokenAssets();
 
-            TokenAssets tokenAssets = new TokenAssets();
-            tokenAssets.setAddress(toAddressHash);
-            tokenAssets.setTokenId(token_id_str);
-            tokenAssets.setTxid(tx);
-            tokenAssets.setVout(n);
-            tokenAssets.setToken(quantity_int);
-            tokenAssets.setFromAddress(assetsList.get(0).getAddress());
-            tokenAssets.setTime(time);
+        if (fromAddress.equals(toAddressHash)) {
+            tokenAssets.setStatus(4);
+        } else {
             tokenAssets.setStatus(2);
-            tokenAssetsService.insertTokenAssets(tokenAssets);
+        }
+
+        tokenAssets.setAddress(toAddressHash);
+        tokenAssets.setTokenId(token_id_str);
+        tokenAssets.setTxid(tx);
+        tokenAssets.setVout(n);
+        tokenAssets.setToken(quantity_int);
+        tokenAssets.setFromAddress(assetsList.get(0).getAddress());
+        tokenAssets.setTime(new Date().getTime());
+
+        tokenAssetsService.insertTokenAssets(tokenAssets);
 
 //        }
 

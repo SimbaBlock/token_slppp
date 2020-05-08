@@ -178,7 +178,9 @@ public enum BizExceptionEnum implements AbstractBaseExceptionEnum {
 
     GENESIS_TOKEN_QUANTITY_ERROR(4000025, "quantity格式错误"),
 
-    ADDRESS_HASH_ERROR(4000026, "当前还无hash记录")
+    ADDRESS_HASH_ERROR(4000026, "当前还无hash记录"),
+
+    MISSING_INPUTS_ERROR(4000027, "missing_inputs")
 
     ;
 

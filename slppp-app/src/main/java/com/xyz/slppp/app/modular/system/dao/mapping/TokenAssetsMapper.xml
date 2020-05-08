@@ -22,14 +22,14 @@
 		SELECT
 		<include refid="Base_Column_List" />
 		FROM
-		`token_assets` where token_id = #{tokenId} and address = #{address}
+		`token_assets` where token_id = #{tokenId} and address = #{address} and status != 3
 	</select>
 
 	<select id="selectAddressToken" resultType="java.math.BigInteger">
 		SELECT
 			sum(token)
 		FROM
-		`token_assets` where token_id = #{tokenId} and address = #{address}
+		`token_assets` where token_id = #{tokenId} and address = #{address} and status != 3
 	</select>
 
 	<select id="selectFromAddressToken" resultType="java.math.BigInteger">
@@ -46,6 +46,12 @@
 		`token_assets` where txid = #{txid} and vout = #{vout}
 	</select>
 
+	<select id="selectFromAddressTokenStatus" resultType="java.math.BigInteger">
+		SELECT
+			sum(token)
+		FROM
+		`token_assets` where token_id = #{tokenId} and address = #{address} and status = 3
+	</select>
 
 	<select id="selectByTxid" resultMap="BaseResultMap">
 		SELECT
@@ -61,7 +67,7 @@
 			UNION
 		SELECT *,2 as type FROM token_assets WHERE from_address = #{address}) a,
    			address_hash_link ahl
-    	WHERE a.address = ahl.address_hash) b left JOIN address_hash_link ahla ON ahla.address_hash = b.fromAddress ORDER BY `time` DESC limit #{offset},#{limit}
+    	WHERE a.address = ahl.address_hash) b left JOIN address_hash_link ahla ON ahla.address_hash = b.fromAddress where b.status != 4 ORDER BY `time` DESC limit #{offset},#{limit}
 	</select>
 
 	<select id="selectHistoryCount" resultType="long">
@@ -76,6 +82,13 @@
 			*
 		FROM
 		`token_assets` where txid = #{txid} and vout = #{vout}
+	</select>
+
+	<select id="findByTokenAssetsStatus" resultType="com.xyz.slppp.app.modular.system.model.TokenAssets">
+		SELECT
+			*
+		FROM
+		`token_assets` where txid = #{txid} and vout = #{vout} and status = #{status}
 	</select>
 
 	<insert id="insertTokenAssets" parameterType="com.xyz.slppp.app.modular.system.model.TokenAssets">
@@ -134,13 +147,23 @@
 		</trim>
 	</insert>
 
+	<update id="updateTokenAssets"  parameterType="com.xyz.slppp.app.modular.system.model.TokenAssets">
+		UPDATE token_assets
+		<trim prefix= "set" suffixOverrides= ",">
+			<if test="status != null">
+				status = #{status},
+			</if>
+		</trim>
+		WHERE txid = #{txid} and vout = #{vout} and address = #{address}
+	</update>
+
 
 	<select id="selectAddressCount" resultType="int">
 
 		SELECT
 			count(0)
 		FROM
-		`token_assets` where address = #{address}
+		`token_assets` where address = #{address} and status != 3
 
 	</select>
 

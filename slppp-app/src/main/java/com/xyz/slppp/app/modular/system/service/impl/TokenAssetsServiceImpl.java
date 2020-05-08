@@ -68,4 +68,19 @@ public class TokenAssetsServiceImpl implements TokenAssetsService {
         return tokenAssetsMapper.selectHistoryCount(query);
     }
 
+    @Override
+    public int updateTokenAssets(TokenAssets tokenAssets) {
+        return tokenAssetsMapper.updateTokenAssets(tokenAssets);
+    }
+
+    @Override
+    public TokenAssets findByTokenAssetsStatus(String txid, Integer vout, Integer status) {
+        return tokenAssetsMapper.findByTokenAssetsStatus(txid, vout, status);
+    }
+
+    @Override
+    public BigInteger selectFromAddressTokenStatus(String tokenId, String address) {
+        return tokenAssetsMapper.selectFromAddressTokenStatus(tokenId, address);
+    }
+
 }

@@ -34,4 +34,9 @@ public class GenesisAddressServiceImpl implements GenesisAddressService {
         return genesisAddressMapper.findRaiseAddress(raiseAddress);
     }
 
+    @Override
+    public GenesisAddress findByRaiseTxidAndRaiseVout(String raiseTxid, Integer raiseVout) {
+        return genesisAddressMapper.findByRaiseTxidAndRaiseVout(raiseTxid, raiseVout);
+    }
+
 }

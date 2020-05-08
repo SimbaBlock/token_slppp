@@ -12,5 +12,7 @@ public interface GenesisAddressService {
 
     GenesisAddress findRaiseAddress(String raiseAddress);
 
+    GenesisAddress findByRaiseTxidAndRaiseVout(String raiseTxid, Integer raiseVout);
+
 
 }

@@ -30,4 +30,10 @@ public interface TokenAssetsMapper {
 
     Long selectHistoryCount(Map<String, Object> query);
 
+    int updateTokenAssets(TokenAssets tokenAssets);
+
+    TokenAssets findByTokenAssetsStatus(@Param("txid") String txid, @Param("vout") Integer vout, @Param("status") Integer status);
+
+    BigInteger selectFromAddressTokenStatus(@Param("tokenId") String tokenId, @Param("address") String address);
+
 }

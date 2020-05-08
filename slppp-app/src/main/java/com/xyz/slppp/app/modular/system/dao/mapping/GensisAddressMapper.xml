@@ -23,6 +23,13 @@
 		`genesis_address` where txid = #{txid} and raise_vout = #{raiseVout}
 	</select>
 
+	<select id="findByRaiseTxidAndRaiseVout" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`genesis_address` where raise_txid = #{raiseTxid} and raise_vout = #{raiseVout}
+	</select>
+
 	<select id="findRaiseAddress" resultMap="BaseResultMap">
 		SELECT
 		<include refid="Base_Column_List" />

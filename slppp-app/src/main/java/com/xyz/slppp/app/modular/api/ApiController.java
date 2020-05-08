@@ -98,9 +98,9 @@ public class ApiController {
 	 */
 	@ResponseBody
 	@RequestMapping("broadcastTx")
-	public JsonResult SendRawTransaction(@RequestBody JSONObject JSONObject) {
+	public JsonResult SendRawTransaction(@RequestBody JSONObject JSONObject) throws Exception {
 
-		try {
+
 
 			String hex = JSONObject.getString("hex");
 
@@ -108,16 +108,9 @@ public class ApiController {
 
 			return new JsonResult().addData("txid", txid);
 
-		} catch (Exception e) {
 
-			e.printStackTrace();
-			return new JsonResult(BizExceptionEnum.SERVER_ERROR.getCode(), BizExceptionEnum.SERVER_ERROR.getMessage());
-
-		}
 
 	}
-
-
 
 
 	public void vouts(JSONObject v, Map<Integer, List<String>> map){
@@ -837,7 +830,11 @@ public class ApiController {
 			Slp slp = slpService.findByTokenId(tokenId);
 			if (token != null && !"".equals(token) && slp != null) {
 				BigInteger fromToken = tokenAssetsService.selectFromAddressToken(tokenId, addressHashLink.getAddressHash());
-				if (fromToken != null && !"".equals(token)) {
+				BigInteger destructionToken = tokenAssetsService.selectFromAddressTokenStatus(tokenId, addressHashLink.getAddressHash());
+				if (destructionToken != null)
+					token = token.subtract(destructionToken);
+
+				if (fromToken != null) {
 					BigInteger newToken = token.subtract(fromToken);
 					return new JsonResult().addData("token", newToken).addData("precition", slp.getTokenDecimal());
 				} else {

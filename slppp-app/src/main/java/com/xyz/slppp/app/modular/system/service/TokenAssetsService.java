@@ -29,4 +29,10 @@ public interface TokenAssetsService {
     List<TokenHistory> selectHistory(Map<String, Object> query);
 
     Long selectHistoryCount(Map<String, Object> query);
+
+    int updateTokenAssets(TokenAssets tokenAssets);
+
+    TokenAssets findByTokenAssetsStatus(String txid, Integer vout, Integer status);
+
+    BigInteger selectFromAddressTokenStatus(String tokenId, String address);
 }

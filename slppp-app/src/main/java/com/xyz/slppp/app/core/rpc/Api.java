@@ -282,4 +282,36 @@ public class Api {
 
 	}
 
+	/**
+	 * 创建两个地址都可以花费的交易
+	 * @param input
+	 * @param output
+	 * @return 		createcontracttransaction
+	 * @throws Exception
+	 */
+	public static String CreateContractTransaction(List<TxInputDto> input, List<ContractTxOputDto> output) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.CreateContractTransaction(input, output);
+		return relust;
+
+	}
+
+	/**
+	 * 创建单地址可以花费的交易
+	 * @param input
+	 * @param output
+	 * @return 		createslppptransaction
+	 * @throws Exception
+	 */
+	public static String CreateSlpppTransaction(List<TxInputDto> input, List<ContractTxOputDto> output) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.CreateSlpppTransaction(input, output);
+		return relust;
+
+	}
+
 }

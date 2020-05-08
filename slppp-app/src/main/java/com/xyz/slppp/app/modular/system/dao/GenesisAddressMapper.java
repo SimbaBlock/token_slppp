@@ -13,4 +13,6 @@ public interface GenesisAddressMapper {
 
     GenesisAddress findRaiseAddress(String raiseAddress);
 
+    GenesisAddress findByRaiseTxidAndRaiseVout(@Param("raiseTxid") String raiseTxid, @Param("raiseVout") Integer raiseVout);
+
 }

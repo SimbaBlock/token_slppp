@@ -85,6 +85,8 @@ public class BitClient {
 				String message = data.getString("message");
 				if (code == -5) {
 					throw new XsvException.InvalidBitcoinAddressException(code, message);
+				} else if (code == -25) {
+					throw new XsvException.InvalidBitcoinAddressException(code, message);
 				}
 
 			}
@@ -183,6 +185,75 @@ public class BitClient {
 		return (String) query("createrawtransaction", pInputs, pOutputs);
 
 	}
+
+
+
+
+	public String CreateContractTransaction(List<TxInputDto> inputs, List<ContractTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
+		List<Map> pInputs = new ArrayList<>();
+
+		for (final TxInputDto txInput : inputs) {
+			pInputs.add(new LinkedHashMap() {
+				{
+					put("txid", txInput.txid());
+					put("vout", txInput.vout());
+				}
+			});
+		}
+
+		Map<String, Object> pOutputs = new LinkedHashMap();
+
+		for (ContractTxOputDto contractTxOputDto : outputs) {
+			if (contractTxOputDto.getType() == 1) {
+				pOutputs.put("address", contractTxOputDto.getAddress());
+				pOutputs.put("amount", contractTxOputDto.getAmount());
+				pOutputs.put("script", contractTxOputDto.getScript());
+			} else if (contractTxOputDto.getType() == 2) {
+				pOutputs.put("address", contractTxOputDto.getAddress());
+				pOutputs.put("amount", contractTxOputDto.getAmount());
+			} else if (contractTxOputDto.getType() == 3){
+				pOutputs.put("data", contractTxOputDto.getData());
+			}
+		}
+
+
+		return (String) query("createcontracttransaction", pInputs, pOutputs);
+
+	}
+
+
+	public String CreateSlpppTransaction(List<TxInputDto> inputs, List<ContractTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
+		List<Map> pInputs = new ArrayList<>();
+
+		for (final TxInputDto txInput : inputs) {
+			pInputs.add(new LinkedHashMap() {
+				{
+					put("txid", txInput.txid());
+					put("vout", txInput.vout());
+				}
+			});
+		}
+
+		Map<String, Object> pOutputs = new LinkedHashMap();
+
+		for (ContractTxOputDto contractTxOputDto : outputs) {
+			if (contractTxOputDto.getType() == 1) {
+				pOutputs.put("address", contractTxOputDto.getAddress());
+				pOutputs.put("amount", contractTxOputDto.getAmount());
+				pOutputs.put("script", contractTxOputDto.getScript());
+			} else if (contractTxOputDto.getType() == 2) {
+				pOutputs.put("address", contractTxOputDto.getAddress());
+				pOutputs.put("amount", contractTxOputDto.getAmount());
+			} else if (contractTxOputDto.getType() == 3){
+				pOutputs.put("data", contractTxOputDto.getData());
+			}
+		}
+
+
+		return (String) query("createslppptransaction", pInputs, pOutputs);
+
+	}
+
 
 	// 签名认证
 	public String signRawTransaction(String hex) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
