@@ -7,5 +7,9 @@ import java.util.List;
 public interface UtxoTokenService {
 
     List<UtxoToken> findByAddress(String address);
-    
+
+    int insertUtxoToken(UtxoToken utxoToken);
+
+    int deleteUtxoToken(String txid, Integer n);
+
 }

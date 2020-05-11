@@ -19,4 +19,14 @@ public class UtxoTokenServiceImpl implements UtxoTokenService {
         return utxoTokenMapper.findByAddress(address);
     }
 
+    @Override
+    public int insertUtxoToken(UtxoToken utxoToken) {
+        return utxoTokenMapper.insertUtxoToken(utxoToken);
+    }
+
+    @Override
+    public int deleteUtxoToken(String txid, Integer n) {
+        return utxoTokenMapper.deleteUtxoToken(txid, n);
+    }
+
 }

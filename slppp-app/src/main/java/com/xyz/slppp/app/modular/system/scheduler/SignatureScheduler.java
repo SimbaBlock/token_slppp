@@ -56,6 +56,9 @@ public class SignatureScheduler {
     @Autowired
     private TokenDestructionService tokenDestructionService;
 
+    @Autowired
+    private UtxoTokenService utxoTokenService;
+
     @Scheduled(cron = "0/5 * * * * ?")
     public void work() {
         self.start();
@@ -108,17 +111,19 @@ public class SignatureScheduler {
 
                 List<TokenAssets> tokenAssetsList = tokenAssetsService.selectByTxid(txid);
 
-                if (tokenAssetsList != null && tokenAssetsList.size() > 0)
-                    continue;
+                if (!txid.equals("83f41435b4993948b19b609004657de625577a808f355aadfca0136c4bf3497a")) {
+                    if (tokenAssetsList != null && tokenAssetsList.size() > 0)
+                        continue;
+                }
 
                 addressHash(j);
 
                 JSONObject txHex = Api.GetRawTransaction(txid);
 
                 JSONArray vouts = txHex.getJSONArray("vout");
-                JSONArray vins = txHex.getJSONArray("vin");
-                TokenAssets tokenAssets = vins(vins);
 
+                JSONArray vins = txHex.getJSONArray("vin");
+                List<TokenAssets> tokenAssetss = vins(vins);
 
                 Long time = txHex.getLong("time");
 
@@ -130,6 +135,7 @@ public class SignatureScheduler {
 
                 List<SlpSend> SlpSendList = new ArrayList<>();
                 List<TokenAssets> TokenAssetsList = new ArrayList<>();
+                List<UtxoToken> utxoTokenList = new ArrayList<>();
                 boolean sendFlag = false;
                 for (Object v : vouts) {
 
@@ -168,8 +174,9 @@ public class SignatureScheduler {
                             String tokenid = UnicodeUtil.getSHA256(open_hex);
 //                               if (map.size() < 2)
 //                                   continue;
-
-                            boolean bl = decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n, time);
+                            String vouthex = scriptPubKey.getString("hex");
+                            String value = vout.getBigDecimal("value").toString();
+                            boolean bl = decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n, time, vouthex, value);
 
                             if (bl)
                                 flag = true;
@@ -179,17 +186,18 @@ public class SignatureScheduler {
                             boolean f = mintVins(vins);         //判断有没有增发权限
 
                             if (f) {
-                                boolean bl = decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time);
+                                String vouthex = scriptPubKey.getString("hex");
+                                String value = vout.getBigDecimal("value").toString();
+                                boolean bl = decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time, vouthex, value);
                                 if (bl)
                                     flag = true;
                             }
 
                         } else if ("53454e44".equals(token_type_str)) {
 
-                            sendFlag = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time, hashmap, SlpSendList, TokenAssetsList);
-
-//                            if (bl)
-//                                flag = true;
+                            String vouthex = scriptPubKey.getString("hex");
+                            String value = vout.getBigDecimal("value").toString();
+                            sendFlag = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time, hashmap, SlpSendList, TokenAssetsList, vouthex, value, utxoTokenList);
 
                         }
                     }
@@ -197,45 +205,52 @@ public class SignatureScheduler {
                 }
 
                 if (sendFlag && hashmap.get(0).compareTo(hashmap.get(1)) >=0) {
-                        flag = true;
-                        if (SlpSendList != null) {
-                            for (SlpSend s : SlpSendList) {
-                                slpSendService.insertSlpSend(s);
-                            }
+                    flag = true;
+                    if (SlpSendList != null) {
+                        for (SlpSend s : SlpSendList) {
+                            slpSendService.insertSlpSend(s);
                         }
+                    }
 
-                        if (TokenAssetsList != null) {
-                            for (TokenAssets t : TokenAssetsList) {
-                                tokenAssetsService.insertTokenAssets(t);
-                            }
+                    if (TokenAssetsList != null) {
+                        for (TokenAssets t : TokenAssetsList) {
+                            tokenAssetsService.insertTokenAssets(t);
                         }
+                    }
+
+                    if (utxoTokenList != null) {
+                        for (UtxoToken ut : utxoTokenList) {
+                            utxoTokenService.insertUtxoToken(ut);
+                        }
+                    }
+
                 }
 
-                if (!flag && tokenAssets != null) {
+                if (!flag && tokenAssetss != null) {
 
-                    TokenDestruction tokenDestruction = new TokenDestruction();
-                    tokenDestruction.setAddress(tokenAssets.getAddress());
-                    tokenDestruction.setTxid(txid);
-                    tokenDestruction.setN(tokenAssets.getVout());
-                    tokenDestructionService.insertTokenDestruction(tokenDestruction);
-                    TokenAssets update = new TokenAssets();
-                    update.setTokenId(tokenAssets.getTokenId());
-                    update.setStatus(3);
-                    update.setTxid(txid);
-                    update.setTime(new Date().getTime());
-                    update.setToken(tokenAssets.getToken());
-                    update.setAddress(tokenAssets.getAddress());
-                    tokenAssetsService.insertTokenAssets(update);
+                    for (TokenAssets tokenAssets : tokenAssetss) {
+
+                        TokenDestruction tokenDestruction = new TokenDestruction();
+                        tokenDestruction.setAddress(tokenAssets.getAddress());
+                        tokenDestruction.setTxid(txid);
+                        tokenDestruction.setN(tokenAssets.getVout());
+                        tokenDestructionService.insertTokenDestruction(tokenDestruction);
+                        TokenAssets update = new TokenAssets();
+                        update.setTokenId(tokenAssets.getTokenId());
+                        update.setStatus(3);
+                        update.setTxid(txid);
+                        update.setTime(new Date().getTime());
+                        update.setToken(tokenAssets.getToken());
+                        update.setAddress(tokenAssets.getAddress());
+                        tokenAssetsService.insertTokenAssets(update);
+
+                    }
 
                 }
 
             }
 
 
-        } else {
-            for (Object j : jsonArray) {
-                addressHash(j);
-            }
         }
 
 
@@ -243,9 +258,8 @@ public class SignatureScheduler {
     }
 
 
-
     //解析发行
-    public boolean decodeGenesistoken(String content, Map<Integer, String> map, String hexStr, String tokenId, String txid, Integer n, Long time) {
+    public boolean decodeGenesistoken(String content, Map<Integer, String> map, String hexStr, String tokenId, String txid, Integer n, Long time, String vouthex, String value) {
 
         String token_ticker_hex = content.substring(0, 2);
         Integer token_ticker = UnicodeUtil.decodeHEX(token_ticker_hex);
@@ -375,12 +389,20 @@ public class SignatureScheduler {
 
         tokenAssetsService.insertTokenAssets(tokenAssets);
 
+        UtxoToken UtxoToken = new UtxoToken();
+        UtxoToken.setAddress(hexStr);
+        UtxoToken.setN(n);
+        UtxoToken.setScript(vouthex);
+        UtxoToken.setTxid(txid);
+        UtxoToken.setValue(value);
+        utxoTokenService.insertUtxoToken(UtxoToken);
+
         return true;
 
     }
 
     // 解析增发
-    public boolean decodeMinttoken(String content, Map<Integer, String> map, String hexStr, String tx, Integer n, Long time) {
+    public boolean decodeMinttoken(String content, Map<Integer, String> map, String hexStr, String tx, Integer n, Long time, String vouthex, String value) {
 
         String token_id_hex = content.substring(0, 2);
         Integer token_id = UnicodeUtil.decodeHEX(token_id_hex);
@@ -459,6 +481,14 @@ public class SignatureScheduler {
         tokenAssets.setStatus(1);
         tokenAssetsService.insertTokenAssets(tokenAssets);
 
+        UtxoToken UtxoToken = new UtxoToken();
+        UtxoToken.setAddress(hexStr);
+        UtxoToken.setN(n);
+        UtxoToken.setScript(vouthex);
+        UtxoToken.setTxid(tx);
+        UtxoToken.setValue(value);
+        utxoTokenService.insertUtxoToken(UtxoToken);
+
         return true;
 
     }
@@ -504,20 +534,26 @@ public class SignatureScheduler {
 
     }
 
-    public TokenAssets vins(JSONArray vins) {
+    public  List<TokenAssets> vins(JSONArray vins) {
+
+        List<TokenAssets> tokenAssetsList = new ArrayList<>();
 
         for (Object v: vins) {
 
             JSONObject vin = (JSONObject) v;
-
-            TokenAssets tokenAssets = tokenAssetsService.findByTokenAssetsStatus(vin.getString("txid"), vin.getInteger("vout"), 3); // 状态不为3
-
+            String txid = vin.getString("txid");
+            Integer vout = vin.getInteger("vout");
+            utxoTokenService.deleteUtxoToken(txid, vout);
+            TokenAssets tokenAssets = tokenAssetsService.findByTokenAssetsStatus(txid, vout, 3);
             if (tokenAssets != null)
-                return tokenAssets;
+                tokenAssetsList.add(tokenAssets); // 状态不为3
 
         }
 
-        return null;
+        if (tokenAssetsList != null && tokenAssetsList.size() > 0)
+            return tokenAssetsList;
+        else
+            return null;
 
     }
 
@@ -553,7 +589,8 @@ public class SignatureScheduler {
     }
 
     //解析发送
-    public boolean decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx, Long time, Map<Integer, BigInteger> hashmap, List<SlpSend> SlpSendList, List<TokenAssets> TokenAssetsList) {
+    public boolean decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx, Long time, Map<Integer, BigInteger> hashmap, List<SlpSend> SlpSendList,
+                                   List<TokenAssets> TokenAssetsList, String vouthex, String value,  List<UtxoToken> UtxoTokenList) {
 
         if ("9f8907667919c1746b23fee959782c1b4d4f34849fd50988ff7c7db17ce22a4d".equals(tx))
             System.out.println("asdasdasdsa");
@@ -641,7 +678,13 @@ public class SignatureScheduler {
 
 //        tokenAssetsService.insertTokenAssets(tokenAssets);
 
-
+        UtxoToken UtxoToken = new UtxoToken();
+        UtxoToken.setAddress(toAddressHash);
+        UtxoToken.setN(n);
+        UtxoToken.setScript(vouthex);
+        UtxoToken.setTxid(tx);
+        UtxoToken.setValue(value);
+        UtxoTokenList.add(UtxoToken);
 
         return true;
 

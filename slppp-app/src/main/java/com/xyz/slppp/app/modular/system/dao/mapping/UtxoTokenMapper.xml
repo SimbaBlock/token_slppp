@@ -22,5 +22,46 @@
 		`utxo_token` where address = #{address} and script != ''
 	</select>
 
+	<insert id="insertUtxoToken" parameterType="com.xyz.slppp.app.modular.system.model.UtxoToken">
+		insert into utxo_token
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="n != null" >
+				n,
+			</if>
+			<if test="address != null" >
+				address,
+			</if>
+			<if test="value != null" >
+				`value`,
+			</if>
+			<if test="script != null" >
+				script,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="n != null" >
+				#{n,jdbcType=INTEGER},
+			</if>
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="value != null" >
+				#{value,jdbcType=VARCHAR},
+			</if>
+			<if test="script != null" >
+				#{script,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<delete id="deleteUtxoToken">
+		delete from utxo_token where txid = #{txid} and n = #{n}
+	</delete>
 
 </mapper>
