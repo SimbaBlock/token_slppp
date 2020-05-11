@@ -14,19 +14,23 @@ import com.xyz.slppp.app.modular.api.vo.TokenHistory;
 import com.xyz.slppp.app.modular.system.model.*;
 import com.xyz.slppp.app.modular.system.service.*;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.alibaba.fastjson.JSONObject;
 
 
+import org.springframework.web.multipart.MultipartFile;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient.Block;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -34,6 +38,8 @@ import java.util.*;
 @Controller
 @RequestMapping("/rest/Api")
 public class ApiController {
+
+	String uploadPath =  "/java/upay/upload-images/";
 
 	@Autowired
 	private SendRawTypeService sendRawTypeService;
@@ -766,6 +772,123 @@ public class ApiController {
     }
 
 
+	/**
+	 * 获取文件后缀名
+	 *
+	 * @param fileName
+	 * @return
+	 */
+	private String getFileType(String fileName) {
+		if (fileName != null && fileName.indexOf(".") >= 0) {
+			return fileName.substring(fileName.lastIndexOf("."), fileName.length());
+		}
+		return "";
+	}
+
+	private Boolean isImageFile(String fileName) {
+		String[] img_type = new String[]{".jpg", ".jpeg", ".png", ".gif", ".bmp"};
+		if (fileName == null) {
+			return false;
+		}
+		fileName = fileName.toLowerCase();
+		for (String type : img_type) {
+			if (fileName.endsWith(type)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@RequestMapping(value="/pidImgUpload", method = RequestMethod.POST)
+	public JsonResult pidImgUpload(@RequestParam(value = "pidImg") MultipartFile pidImg, HttpServletRequest request) {
+
+		String img2 = null;
+
+		File uploadDirectory = new File(uploadPath);
+
+		if (uploadDirectory.exists()) {
+			if (!uploadDirectory.isDirectory()) {
+				uploadDirectory.delete();
+			}
+		} else {
+			uploadDirectory.mkdir();
+		}
+
+		BufferedOutputStream bw = null;
+
+		try {
+
+			String fileName2 = pidImg.getOriginalFilename();
+			//判断是否有文件且是否为图片文件
+			if(fileName2!=null && !"".equalsIgnoreCase(fileName2.trim()) && isImageFile(fileName2)) {
+				//创建输出文件对象
+				String name = UUID.randomUUID().toString()+ getFileType(fileName2);
+				File outFile = new File(uploadPath+name);
+				//拷贝文件到输出文件对象
+				FileUtils.copyInputStreamToFile(pidImg.getInputStream(), outFile);
+				img2 = "http://47.110.137.123:8433/upload-images/"+name;
+			}
+
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (bw != null) {
+					bw.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return new JsonResult().addData("pidImg", img2);
+	}
+
+	@RequestMapping(value="/bidImgUpload", method = RequestMethod.POST)
+	public JsonResult bidImgUpload(@RequestParam(value = "bidImg") MultipartFile bidImg, HttpServletRequest request) {
+
+		String img3 = null;
+
+		File uploadDirectory = new File(uploadPath);
+
+		if (uploadDirectory.exists()) {
+			if (!uploadDirectory.isDirectory()) {
+				uploadDirectory.delete();
+			}
+		} else {
+			uploadDirectory.mkdir();
+		}
+
+		BufferedOutputStream bw = null;
+
+		try {
+
+			String fileName3 = bidImg.getOriginalFilename();
+			//判断是否有文件且是否为图片文件
+			if(fileName3!=null && !"".equalsIgnoreCase(fileName3.trim()) && isImageFile(fileName3)) {
+				//创建输出文件对象
+				String name = UUID.randomUUID().toString()+ getFileType(fileName3);
+				File outFile = new File(uploadPath+name);
+				//拷贝文件到输出文件对象
+				FileUtils.copyInputStreamToFile(bidImg.getInputStream(), outFile);
+				img3 = "http://47.110.137.123:8433/upload-images/"+name;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (bw != null) {
+					bw.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return new JsonResult().addData("bidImg", img3);
+	}
 
 
 	/**
@@ -782,6 +905,9 @@ public class ApiController {
 		String address = jsonData.getString("address");
 		String name = jsonData.getString("name");
 		String IDnumber = jsonData.getString("ID_number");
+		String positiveImg = jsonData.getString("positive_img");
+		String backImg = jsonData.getString("back_img");
+		String phone = jsonData.getString("phone");
 
 		KycAddress kycAddress = kycAddressService.selectAddress(address);
 
@@ -792,6 +918,9 @@ public class ApiController {
 		KycAddress.setAddress(address);
 		KycAddress.setName(name);
 		KycAddress.setIdNumber(IDnumber);
+		KycAddress.setPositiveImg(positiveImg);
+		KycAddress.setBackImg(backImg);
+		KycAddress.setPhone(phone);
 		kycAddressService.insertKycAddress(KycAddress);
 
 		String addressHash = Api.ValidateAddress(address).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");

@@ -10,6 +10,36 @@ public class KycAddress {
 
     private String idNumber;
 
+    private String positiveImg;
+
+    private String backImg;
+
+    private String phone;
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPositiveImg() {
+        return positiveImg;
+    }
+
+    public void setPositiveImg(String positiveImg) {
+        this.positiveImg = positiveImg;
+    }
+
+    public String getBackImg() {
+        return backImg;
+    }
+
+    public void setBackImg(String backImg) {
+        this.backImg = backImg;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -41,4 +71,5 @@ public class KycAddress {
     public void setIdNumber(String idNumber) {
         this.idNumber = idNumber;
     }
+
 }

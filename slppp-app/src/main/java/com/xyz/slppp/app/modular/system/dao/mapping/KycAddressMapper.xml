@@ -8,10 +8,13 @@
 		<result column="address" property="address" jdbcType="VARCHAR"/>
 		<result column="name" property="name" jdbcType="VARCHAR"/>
 		<result column="id_number" property="idNumber" jdbcType="VARCHAR"/>
+		<result column="positive_img" property="positiveImg" jdbcType="VARCHAR"/>
+		<result column="back_img" property="backImg" jdbcType="VARCHAR"/>
+		<result column="phone" property="phone" jdbcType="VARCHAR"/>
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		id, address, name, id_number
+		id, address, name, id_number, positive_img, back_img, phone
 	</sql>
 
 	<select id="selectAddress" resultMap="BaseResultMap">
@@ -19,6 +22,13 @@
 		<include refid="Base_Column_List" />
 		FROM
 		`kyc_address` where address = #{address}
+	</select>
+
+	<select id="selectKycAddress" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`kyc_address`
 	</select>
 
 	<insert id="insertKycAddress" parameterType="com.xyz.slppp.app.modular.system.model.KycAddress">
@@ -33,6 +43,15 @@
 			<if test="idNumber != null" >
 				id_number,
 			</if>
+			<if test="positiveImg != null" >
+				positive_img,
+			</if>
+			<if test="backImg != null" >
+				back_img,
+			</if>
+			<if test="phone != null" >
+				phone,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="address != null" >
@@ -43,6 +62,15 @@
 			</if>
 			<if test="idNumber != null" >
 				#{idNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="positiveImg != null" >
+				#{positiveImg,jdbcType=VARCHAR},
+			</if>
+			<if test="backImg != null" >
+				#{backImg,jdbcType=VARCHAR},
+			</if>
+			<if test="phone != null" >
+				#{phone,jdbcType=VARCHAR},
 			</if>
 		</trim>
 	</insert>

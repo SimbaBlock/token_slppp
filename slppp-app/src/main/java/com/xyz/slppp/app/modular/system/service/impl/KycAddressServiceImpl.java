@@ -6,6 +6,7 @@ import com.xyz.slppp.app.modular.system.service.KycAddressService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class KycAddressServiceImpl implements KycAddressService {
@@ -21,6 +22,11 @@ public class KycAddressServiceImpl implements KycAddressService {
     @Override
     public KycAddress selectAddress(String address) {
         return kycAddressMapper.selectAddress(address);
+    }
+
+    @Override
+    public List<KycAddress> selectKycAddress() {
+        return kycAddressMapper.selectKycAddress();
     }
 
 }

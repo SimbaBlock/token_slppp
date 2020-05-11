@@ -51,9 +51,6 @@ public class SignatureScheduler {
     private TokenAssetsService tokenAssetsService;
 
     @Autowired
-    private TransactionService transactionService;
-
-    @Autowired
     private TokenDestructionService tokenDestructionService;
 
     @Autowired
@@ -111,10 +108,10 @@ public class SignatureScheduler {
 
                 List<TokenAssets> tokenAssetsList = tokenAssetsService.selectByTxid(txid);
 
-                if (!txid.equals("83f41435b4993948b19b609004657de625577a808f355aadfca0136c4bf3497a")) {
-                    if (tokenAssetsList != null && tokenAssetsList.size() > 0)
-                        continue;
-                }
+
+                if (tokenAssetsList != null && tokenAssetsList.size() > 0)
+                    continue;
+
 
                 addressHash(j);
 
@@ -129,7 +126,8 @@ public class SignatureScheduler {
 
                 Map<Integer, String> map = vouts(vouts);
 
-                boolean flag = false;
+                boolean flag = false;           // 销毁立flag, 如果最后是false并且当前的vin包含token，则销毁
+
                 Map<Integer, BigInteger> hashmap = new HashedMap();
                 hashmap.put(1,new BigInteger("0"));
 
@@ -226,7 +224,7 @@ public class SignatureScheduler {
 
                 }
 
-                if (!flag && tokenAssetss != null) {
+                if (!flag && tokenAssetss != null) {            //销毁
 
                     for (TokenAssets tokenAssets : tokenAssetss) {
 
@@ -616,6 +614,7 @@ public class SignatureScheduler {
             // 超出范围
             return false;
         }
+
         List<TokenAssets> assetsList = new ArrayList<>();
         for (Object v : vins) {
             JSONObject vin = (JSONObject) v;
@@ -654,9 +653,6 @@ public class SignatureScheduler {
         slpSend.setTxid(tx);
         SlpSendList.add(slpSend);
 
-//        slpSendService.insertSlpSend(slpSend);
-
-
         String fromAddress = assetsList.get(0).getAddress();
         TokenAssets tokenAssets = new TokenAssets();
 
@@ -675,8 +671,6 @@ public class SignatureScheduler {
         tokenAssets.setTime(new Date().getTime());
 
         TokenAssetsList.add(tokenAssets);
-
-//        tokenAssetsService.insertTokenAssets(tokenAssets);
 
         UtxoToken UtxoToken = new UtxoToken();
         UtxoToken.setAddress(toAddressHash);

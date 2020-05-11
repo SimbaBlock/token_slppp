@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(XsvException.InvalidBitcoinAddressException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public JsonResult invalidBitcoinAddress(XsvException.InvalidBitcoinAddressException e) {
         if (e.getCode() == -5)
