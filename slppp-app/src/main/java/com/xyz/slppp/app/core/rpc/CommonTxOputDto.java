@@ -2,9 +2,11 @@ package com.xyz.slppp.app.core.rpc;
 
 import java.math.BigDecimal;
 
-public class ContractTxOputDto {
+public class CommonTxOputDto {
 
-    private String[] address;
+    private String[] addresss;
+
+    private String address;
 
     private BigDecimal amount;
 
@@ -16,23 +18,43 @@ public class ContractTxOputDto {
 
     char[] chars = "0123456789ABCDEF".toCharArray();
 
+    public CommonTxOputDto(String[] addresss, BigDecimal amount, String script, Integer type) {
+        this.addresss = addresss;
+        this.amount = amount;
+        this.script = script;
+        this.type = type;
+    }
 
-    public ContractTxOputDto(String[] address, BigDecimal amount, String script, Integer type) {
+    public CommonTxOputDto(String address, BigDecimal amount, String script, Integer type) {
         this.address = address;
         this.amount = amount;
         this.script = script;
         this.type = type;
     }
 
-    public ContractTxOputDto(String[] address, BigDecimal amount, Integer type) {
+    public CommonTxOputDto(String address, BigDecimal amount, Integer type) {
         this.address = address;
         this.amount = amount;
         this.type = type;
     }
 
-    public ContractTxOputDto(String data, Integer type) {
+    public CommonTxOputDto(String[] addresss, BigDecimal amount, Integer type) {
+        this.addresss = addresss;
+        this.amount = amount;
+        this.type = type;
+    }
+
+    public CommonTxOputDto(String data, Integer type) {
         this.data = data;
         this.type = type;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public BigDecimal getAmount() {
@@ -51,12 +73,12 @@ public class ContractTxOputDto {
         this.type = type;
     }
 
-    public String[] getAddress() {
-        return address;
+    public String[] getAddresss() {
+        return addresss;
     }
 
-    public void setAddress(String[] address) {
-        this.address = address;
+    public void setAddresss(String[] address) {
+        this.addresss = address;
     }
 
     public String getData() {

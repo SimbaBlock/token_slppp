@@ -189,7 +189,7 @@ public class BitClient {
 
 
 
-	public String CreateContractTransaction(List<TxInputDto> inputs, List<ContractTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
+	public String CreateContractTransaction(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		List<Map> pInputs = new ArrayList<>();
 
 		for (final TxInputDto txInput : inputs) {
@@ -203,7 +203,7 @@ public class BitClient {
 
 		Map<String, Object> pOutputs = new LinkedHashMap();
 
-		for (ContractTxOputDto contractTxOputDto : outputs) {
+		for (CommonTxOputDto contractTxOputDto : outputs) {
 			if (contractTxOputDto.getType() == 1) {
 				pOutputs.put("address", contractTxOputDto.getAddress());
 				pOutputs.put("amount", contractTxOputDto.getAmount());
@@ -222,7 +222,7 @@ public class BitClient {
 	}
 
 
-	public String CreateSlpppTransaction(List<TxInputDto> inputs, List<ContractTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
+	public String CreateSlpppTransaction(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		List<Map> pInputs = new ArrayList<>();
 
 		for (final TxInputDto txInput : inputs) {
@@ -234,19 +234,23 @@ public class BitClient {
 			});
 		}
 
-		Map<String, Object> pOutputs = new LinkedHashMap();
+		List<Map> pOutputs = new ArrayList<>();
 
-		for (ContractTxOputDto contractTxOputDto : outputs) {
-			if (contractTxOputDto.getType() == 1) {
-				pOutputs.put("address", contractTxOputDto.getAddress());
-				pOutputs.put("amount", contractTxOputDto.getAmount());
-				pOutputs.put("script", contractTxOputDto.getScript());
-			} else if (contractTxOputDto.getType() == 2) {
-				pOutputs.put("address", contractTxOputDto.getAddress());
-				pOutputs.put("amount", contractTxOputDto.getAmount());
-			} else if (contractTxOputDto.getType() == 3){
-				pOutputs.put("data", contractTxOputDto.getData());
-			}
+		for (CommonTxOputDto contractTxOputDto : outputs) {
+			pOutputs.add(new LinkedHashMap() {
+				{
+					if(contractTxOputDto.getType()==1) {
+						put("address", contractTxOputDto.getAddress());
+						put("amount", contractTxOputDto.getAmount());
+						put("script", contractTxOputDto.getScript());
+					} else if(contractTxOputDto.getType()==2) {
+						put("address", contractTxOputDto.getAddress());
+						put("amount", contractTxOputDto.getAmount());
+					} else if(contractTxOputDto.getType()==3){
+						put("data", contractTxOputDto.getData());
+					}
+				}
+			});
 		}
 
 

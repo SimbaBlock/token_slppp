@@ -289,7 +289,7 @@ public class Api {
 	 * @return 		createcontracttransaction
 	 * @throws Exception
 	 */
-	public static String CreateContractTransaction(List<TxInputDto> input, List<ContractTxOputDto> output) throws Exception {
+	public static String CreateContractTransaction(List<TxInputDto> input, List<CommonTxOputDto> output) throws Exception {
 
 		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
 		BitClient bitClient = new BitClient(url);
@@ -305,7 +305,7 @@ public class Api {
 	 * @return 		createslppptransaction
 	 * @throws Exception
 	 */
-	public static String CreateSlpppTransaction(List<TxInputDto> input, List<ContractTxOputDto> output) throws Exception {
+	public static String CreateSlpppTransaction(List<TxInputDto> input, List<CommonTxOputDto> output) throws Exception {
 
 		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
 		BitClient bitClient = new BitClient(url);
