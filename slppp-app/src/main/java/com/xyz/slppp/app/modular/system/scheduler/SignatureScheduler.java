@@ -170,8 +170,6 @@ public class SignatureScheduler {
 
                         if ("47454e45534953".equals(token_type_str)) {
                             String tokenid = UnicodeUtil.getSHA256(open_hex);
-//                               if (map.size() < 2)
-//                                   continue;
                             String vouthex = scriptPubKey.getString("hex");
                             String value = vout.getBigDecimal("value").toString();
                             boolean bl = decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n, time, vouthex, value);
@@ -457,10 +455,6 @@ public class SignatureScheduler {
         if (slp == null)
             return false;   // 不存在token
 
-
-//        GenesisAddress genesisaddress = genesisAddressService.findRaiseAddress(hexStr);
-//        if (genesisaddress == null)
-//            return false;   // 无权限增发
 
         SlpMint slpMint = new SlpMint();
         slpMint.setTransactionType("mint");
