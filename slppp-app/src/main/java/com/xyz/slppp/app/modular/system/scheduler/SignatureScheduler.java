@@ -178,6 +178,10 @@ public class SignatureScheduler {
 
                             if (bl)
                                 flag = true;
+                            else {
+                                flag = false;
+                                break;
+                            }
 
                         } else if ("4d494e54".equals(token_type_str)) {
 
@@ -189,6 +193,10 @@ public class SignatureScheduler {
                                 boolean bl = decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time, vouthex, value);
                                 if (bl)
                                     flag = true;
+                                else {
+                                    flag = false;
+                                    break;
+                                }
                             }
 
                         } else if ("53454e44".equals(token_type_str)) {
@@ -196,6 +204,8 @@ public class SignatureScheduler {
                             String vouthex = scriptPubKey.getString("hex");
                             String value = vout.getBigDecimal("value").toString();
                             sendFlag = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time, hashmap, SlpSendList, TokenAssetsList, vouthex, value, utxoTokenList);
+                            if (!sendFlag)
+                                break;
 
                         }
                     }

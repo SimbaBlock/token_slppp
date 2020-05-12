@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class UploadFilePathConfig  implements WebMvcConfigurer {
 
     private String staticAccessPath = "/upload-images/**";
-    private String uploadFolder = "/java/electronic_signature/upload-images/";
+    private String uploadFolder = "/java/upay/upload-images/";
 
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(staticAccessPath).addResourceLocations("file://" + uploadFolder);

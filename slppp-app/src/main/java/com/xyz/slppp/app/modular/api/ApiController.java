@@ -799,8 +799,9 @@ public class ApiController {
 		return false;
 	}
 
+	@ResponseBody
 	@RequestMapping(value="/pidImgUpload", method = RequestMethod.POST)
-	public JsonResult pidImgUpload(@RequestParam(value = "pidImg") MultipartFile pidImg, HttpServletRequest request) {
+	public JsonResult pidImgUpload(@RequestParam(value = "pidImg") MultipartFile pidImg) {
 
 		String img2 = null;
 
@@ -845,8 +846,9 @@ public class ApiController {
 		return new JsonResult().addData("pidImg", img2);
 	}
 
+	@ResponseBody
 	@RequestMapping(value="/bidImgUpload", method = RequestMethod.POST)
-	public JsonResult bidImgUpload(@RequestParam(value = "bidImg") MultipartFile bidImg, HttpServletRequest request) {
+	public JsonResult bidImgUpload(@RequestParam(value = "bidImg") MultipartFile bidImg) {
 
 		String img3 = null;
 
