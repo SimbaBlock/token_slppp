@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -57,12 +58,13 @@ public class SignatureScheduler {
     private UtxoTokenService utxoTokenService;
 
     @Scheduled(cron = "0/5 * * * * ?")
-    public void work() {
+    public void work() throws Exception {
         self.start();
     }
 
     @TimeStat
-    public void start(){
+    @Transactional(rollbackFor=Exception.class)
+    public void start() throws Exception {
 
         try {
 
@@ -93,6 +95,7 @@ public class SignatureScheduler {
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw e;
         }
 
     }
