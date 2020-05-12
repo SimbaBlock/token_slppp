@@ -350,6 +350,8 @@ public class ApiController {
 
 		addressHashLinkService.insertAddressHashLink(addressHashLink);
 
+        Api.SendToAddress(address, new BigDecimal("0.0001"));
+
 
 		return new JsonResult();
 
