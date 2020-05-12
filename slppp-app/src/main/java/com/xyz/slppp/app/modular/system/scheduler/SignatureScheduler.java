@@ -64,32 +64,64 @@ public class SignatureScheduler {
 
     @TimeStat
     @Transactional(rollbackFor=Exception.class)
-    public void start() throws Exception {
+    public void start() {
 
         try {
 
             Integer count = blockCountService.findBlockCount();
-            Integer json = Api.GetBlockCount();
+
+            Integer json = 0;
+
+            try {
+
+                json = Api.GetBlockCount();
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            }
+
 
             if (count < json + 1) {
+                JSONObject block = new JSONObject();
 
-                String blockHash = Api.GetBlockHash(count);
-                JSONObject block = Api.GetBlock(blockHash);
+                try {
+                    String blockHash = Api.GetBlockHash(count);
+                    block = Api.GetBlock(blockHash);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 JSONArray jsonArray = block.getJSONArray("tx");
 
-                block(jsonArray);
+                try {
+                    block(jsonArray);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 count ++;
                 blockCountService.updateBlock(count);
 
             } else {
+                List<String> txList = new ArrayList<>();
 
-                List<String> txList = Api.GetRawMemPool();
+                try {
+                   txList = Api.GetRawMemPool();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 JSONArray jsonArray = new JSONArray();
                 for (String tx: txList) {
                     jsonArray.add(tx);
                 }
-                block(jsonArray);
+                try {
+                    block(jsonArray);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
 
@@ -101,7 +133,7 @@ public class SignatureScheduler {
     }
 
     @Transactional(rollbackFor=Exception.class)
-    public void block(JSONArray jsonArray) throws Exception {
+    public void block(JSONArray jsonArray) {
 
         try {
 
@@ -117,15 +149,30 @@ public class SignatureScheduler {
                     if (tokenAssetsList != null && tokenAssetsList.size() > 0)
                         continue;
 
+                    try {
+                        addressHash(j);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
-                    addressHash(j);
+                    JSONObject txHex = new JSONObject();
 
-                    JSONObject txHex = Api.GetRawTransaction(txid);
+                    try {
+                        txHex = Api.GetRawTransaction(txid);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                     JSONArray vouts = txHex.getJSONArray("vout");
 
                     JSONArray vins = txHex.getJSONArray("vin");
-                    List<TokenAssets> tokenAssetss = vins(vins);
+                    List<TokenAssets> tokenAssetss = new ArrayList<>();
+
+                    try {
+                        tokenAssetss = vins(vins);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                     Long time = txHex.getLong("time");
 
@@ -174,10 +221,25 @@ public class SignatureScheduler {
                             OP_RETURN = OP_RETURN.replaceFirst(token_type_str, "");
 
                             if ("47454e45534953".equals(token_type_str)) {
-                                String tokenid = UnicodeUtil.getSHA256(open_hex);
+
+                                String tokenid = "";
+
+                                try {
+                                    tokenid = UnicodeUtil.getSHA256(open_hex);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
                                 String vouthex = scriptPubKey.getString("hex");
                                 String value = vout.getBigDecimal("value").toString();
-                                boolean bl = decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n, time, vouthex, value);
+
+                                boolean bl = false;
+
+                                try {
+                                    bl = decodeGenesistoken(OP_RETURN, map, hexStr, tokenid, txid, n, time, vouthex, value);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
 
                                 if (bl)
                                     flag = true;
@@ -188,12 +250,25 @@ public class SignatureScheduler {
 
                             } else if ("4d494e54".equals(token_type_str)) {
 
-                                boolean f = mintVins(vins);         //判断有没有增发权限
+                                boolean f = false;
+
+                                try {
+                                    f = mintVins(vins);         //判断有没有增发权限
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
 
                                 if (f) {
                                     String vouthex = scriptPubKey.getString("hex");
                                     String value = vout.getBigDecimal("value").toString();
-                                    boolean bl = decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time, vouthex, value);
+                                    boolean bl = false;
+
+                                    try {
+                                        bl = decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time, vouthex, value);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+
                                     if (bl)
                                         flag = true;
                                     else {
@@ -590,13 +665,18 @@ public class SignatureScheduler {
     }
 
     @Transactional(rollbackFor=Exception.class)
-    public void addressHash(Object j) throws Exception {
+    public void addressHash(Object j) {
 
         try {
 
             String tx = (String) j;
-            JSONObject transaction = Api.GetRawTransaction(tx);
-            System.out.println(transaction.toJSONString());
+            JSONObject transaction = null;
+            try {
+                transaction = Api.GetRawTransaction(tx);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             JSONArray vouts = transaction.getJSONArray("vout");
 
             for (Object vout : vouts) {
@@ -604,10 +684,17 @@ public class SignatureScheduler {
                 JSONObject voutJSON = (JSONObject) vout;
                 JSONObject scriptPubKey = voutJSON.getJSONObject("scriptPubKey");
                 JSONArray addresss = scriptPubKey.getJSONArray("addresses");
+
                 if (addresss != null) {
+
                     for (Object address : addresss) {
                         String ad = address.toString();
-                        String addressHash = Api.ValidateAddress(ad).getString("scriptPubKey").replaceFirst("76a914", "");
+                        String addressHash = "";
+                        try {
+                            addressHash = Api.ValidateAddress(ad).getString("scriptPubKey").replaceFirst("76a914", "");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         AddressHashLink addressHashLink = addressHashLinkService.findByAddress(ad);
                         if (addressHashLink != null)
                             continue;

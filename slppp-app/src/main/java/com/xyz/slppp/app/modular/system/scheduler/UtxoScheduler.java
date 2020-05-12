@@ -32,12 +32,10 @@ public class UtxoScheduler {
     @Autowired
     private UtxoService utxoService;
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0/59 * * * * ?")
     public void work() {
         self.start();
     }
-
-    static String systemnAddress = "";
 
     @TimeStat
     public void start(){
@@ -46,7 +44,6 @@ public class UtxoScheduler {
 
             List<KycAddress> kycAddressList = kycAddressService.selectKycAddress();
 
-            BigDecimal amount = new BigDecimal("0.00001");
             for (KycAddress kycAddress : kycAddressList) {
 
                 String address = kycAddress.getAddress();
@@ -57,30 +54,9 @@ public class UtxoScheduler {
                     sumValue = sumValue.add(new BigDecimal(utxo.getValue()));
                 }
 
-                if (sumValue.subtract(new BigDecimal("0.000005")).compareTo(new BigDecimal("0")) <= 0) {
-                    //钱不够，打XSV
-                    List<TxInputDto> inputList = new ArrayList<>();
-                    List<TxOutputDto > outputList = new ArrayList<>();
+                if (sumValue.subtract(new BigDecimal("0.00005")).compareTo(new BigDecimal("0")) <= 0) {
 
-                    List<Utxo> systemnAddressUtxoList = utxoService.findByAddress(systemnAddress);
-                    BigDecimal sysSumValue = new BigDecimal("0");
-                    for (Utxo utxo : systemnAddressUtxoList) {
-                        TxInputDto input = new TxInputDto(utxo.getTxid(), utxo.getN(),"");
-                        inputList.add(input);
-                        sysSumValue = sysSumValue.add(new BigDecimal(utxo.getValue()));
-                    }
-
-
-                    TxOutputDto output1 = new TxOutputDto(systemnAddress, sysSumValue.subtract(amount).subtract(new BigDecimal("0.000005")));
-                    TxOutputDto output2 = new TxOutputDto(address, amount);
-                    outputList.add(output1);
-                    outputList.add(output2);
-                    String hex = Api.CreateRawTransaction(inputList, outputList);
-
-                    String signHex = Api.SignRawTransaction(hex);
-
-                    Api.SendRawTransaction(signHex);
-
+                    Api.SendToAddress(address, new BigDecimal("0.0001"));
 
                 }
 
