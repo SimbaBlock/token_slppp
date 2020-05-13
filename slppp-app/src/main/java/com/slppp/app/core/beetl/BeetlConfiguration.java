@@ -15,7 +15,6 @@
  */
 package com.slppp.app.core.beetl;
 
-import com.slppp.app.core.util.KaptchaUtil;
 import cn.stylefeng.roses.core.util.ToolUtil;
 import org.beetl.core.Context;
 import org.beetl.core.Function;
@@ -43,7 +42,6 @@ public class BeetlConfiguration extends BeetlGroupUtilConfiguration {
     public void initOther() {
 
         groupTemplate.registerFunctionPackage("tool", new ToolUtil());
-        groupTemplate.registerFunctionPackage("kaptcha", new KaptchaUtil());
 
 
         groupTemplate.registerFunction("env", new Function() {
