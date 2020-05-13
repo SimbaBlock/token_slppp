@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.slppp.app.modular.system.dao.TokenAssetsMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.slppp.app.modular.system.model.TokenAssets">
+		<result column="token_id" property="tokenId" jdbcType="VARCHAR"/>
+		<result column="address" property="address" jdbcType="VARCHAR"/>
+		<result column="token" property="token" jdbcType="BIGINT"/>
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="vout" property="vout" jdbcType="INTEGER"/>
+		<result column="from_address" property="fromAddress" jdbcType="VARCHAR"/>
+		<result column="time" property="time" jdbcType="BIGINT"/>
+		<result column="status" property="status" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		token_id, address, token, txid, vout, from_address, `time`, status
+	</sql>
+
+	<select id="selectToken" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`token_assets` where token_id = #{tokenId} and address = #{address} and status != 3
+	</select>
+
+	<select id="selectAddressToken" resultType="java.math.BigInteger">
+		SELECT
+			sum(token)
+		FROM
+		`token_assets` where token_id = #{tokenId} and address = #{address} and status != 3
+	</select>
+
+	<select id="selectFromAddressToken" resultType="java.math.BigInteger">
+		SELECT
+			sum(token)
+		FROM
+		`token_assets` where token_id = #{tokenId} and from_address = #{address}
+	</select>
+
+	<select id="selectFAToken" resultType="java.math.BigInteger">
+		SELECT
+			token
+		FROM
+		`token_assets` where txid = #{txid} and vout = #{vout}
+	</select>
+
+	<select id="selectFromAddressTokenStatus" resultType="java.math.BigInteger">
+		SELECT
+			sum(token)
+		FROM
+		`token_assets` where token_id = #{tokenId} and address = #{address} and status = 3
+	</select>
+
+	<select id="selectByTxid" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`token_assets` where txid = #{txid}
+	</select>
+
+
+	<select id="selectHistory" resultType="com.slppp.app.modular.api.vo.TokenHistory">
+		SELECT b.toAddress, ahla.address as fromAddress, b.token, b.time,b.`status`,b.type FROM (SELECT ahl.address as toAddress, token, a.from_address as fromAddress, `time`, status, type from
+ 		(SELECT *,1 as type FROM token_assets WHERE address = #{address}
+			UNION
+		SELECT *,2 as type FROM token_assets WHERE from_address = #{address}) a,
+   			address_hash_link ahl
+    	WHERE a.address = ahl.address_hash) b left JOIN address_hash_link ahla ON ahla.address_hash = b.fromAddress where b.status != 4 ORDER BY `time` DESC limit #{offset},#{limit}
+	</select>
+
+	<select id="selectHistoryCount" resultType="long">
+		SELECT count(0) from (SELECT *,1 as type FROM token_assets WHERE address = #{address}
+		UNION
+		SELECT *,2 as type FROM token_assets WHERE from_address = #{address}) a
+	</select>
+
+
+	<select id="findByTokenAssets" resultType="com.slppp.app.modular.system.model.TokenAssets">
+		SELECT
+			*
+		FROM
+		`token_assets` where txid = #{txid} and vout = #{vout}
+	</select>
+
+	<select id="findByTokenAssetsStatus" resultType="com.slppp.app.modular.system.model.TokenAssets">
+		SELECT
+			*
+		FROM
+		`token_assets` where txid = #{txid} and vout = #{vout} and status != 3
+	</select>
+
+	<insert id="insertTokenAssets" parameterType="com.slppp.app.modular.system.model.TokenAssets">
+		insert into token_assets
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="tokenId != null" >
+				`token_id`,
+			</if>
+			<if test="address != null" >
+				`address`,
+			</if>
+			<if test="token != null" >
+				`token`,
+			</if>
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="vout != null" >
+				`vout`,
+			</if>
+			<if test="fromAddress != null" >
+				`from_address`,
+			</if>
+			<if test="time != null" >
+				`time`,
+			</if>
+			<if test="status != null" >
+				`status`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="tokenId != null" >
+				#{tokenId,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="token != null" >
+				#{token,jdbcType=BIGINT},
+			</if>
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="vout != null" >
+				#{vout,jdbcType=INTEGER},
+			</if>
+			<if test="fromAddress != null" >
+				#{fromAddress,jdbcType=VARCHAR},
+			</if>
+			<if test="time != null" >
+				#{time,jdbcType=BIGINT},
+			</if>
+			<if test="status != null" >
+				#{status,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="updateTokenAssets"  parameterType="com.slppp.app.modular.system.model.TokenAssets">
+		UPDATE token_assets
+		<trim prefix= "set" suffixOverrides= ",">
+			<if test="status != null">
+				status = #{status},
+			</if>
+		</trim>
+		WHERE txid = #{txid} and vout = #{vout} and address = #{address}
+	</update>
+
+
+	<select id="selectAddressCount" resultType="int">
+
+		SELECT
+			count(0)
+		FROM
+		`token_assets` where address = #{address} and status != 3
+
+	</select>
+
+</mapper>
