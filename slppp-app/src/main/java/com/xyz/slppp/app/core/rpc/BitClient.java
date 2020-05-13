@@ -3,6 +3,7 @@ package com.xyz.slppp.app.core.rpc;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -302,6 +303,10 @@ public class BitClient {
 
 	public String validateAddress(String address) throws XsvException.InvalidBitcoinAddressException {
 		 return JSON.stringify(query("validateaddress", address));
+	}
+
+	public String sendToAddress(String toAddress, BigDecimal amount) throws XsvException.InvalidBitcoinAddressException {
+		return (String) query("sendtoaddress", toAddress, amount);
 	}
 
 }

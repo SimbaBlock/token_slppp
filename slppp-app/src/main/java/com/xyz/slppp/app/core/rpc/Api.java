@@ -1,5 +1,6 @@
 package com.xyz.slppp.app.core.rpc;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.List;
 
@@ -310,6 +311,22 @@ public class Api {
 		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
 		BitClient bitClient = new BitClient(url);
 		String relust = bitClient.CreateSlpppTransaction(input, output);
+		return relust;
+
+	}
+
+	/**
+	 * 地址打钱
+	 * @param
+	 * @param
+	 * @return 		createslppptransaction
+	 * @throws Exception
+	 */
+	public static String SendToAddress(String address, BigDecimal amount) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.sendToAddress(address, amount);
 		return relust;
 
 	}

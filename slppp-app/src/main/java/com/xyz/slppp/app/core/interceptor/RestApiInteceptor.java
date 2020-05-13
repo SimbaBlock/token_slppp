@@ -18,9 +18,7 @@ package com.xyz.slppp.app.core.interceptor;
 import com.xyz.slppp.app.core.common.constant.JwtConstants;
 import com.xyz.slppp.app.core.common.exception.BizExceptionEnum;
 import com.xyz.slppp.app.core.util.JsonResult;
-import com.xyz.slppp.app.core.util.JwtTokenUtil;
 import cn.stylefeng.roses.core.util.RenderUtil;
-import io.jsonwebtoken.JwtException;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,7 +51,7 @@ public class RestApiInteceptor extends HandlerInterceptorAdapter {
             authToken = requestHeader.substring(7);
 
             //验证token是否过期,包含了验证jwt是否正确
-            try {
+        /*    try {
                 boolean flag = JwtTokenUtil.isTokenExpired(authToken);
                 if (flag) {
                     RenderUtil.renderJson(response, new JsonResult(BizExceptionEnum.TOKEN_EXPIRED.getCode(), BizExceptionEnum.TOKEN_EXPIRED.getMessage()));
@@ -63,7 +61,7 @@ public class RestApiInteceptor extends HandlerInterceptorAdapter {
                 //有异常就是token解析失败
                 RenderUtil.renderJson(response, new JsonResult(BizExceptionEnum.TOKEN_ERROR.getCode(), BizExceptionEnum.TOKEN_ERROR.getMessage()));
                 return false;
-            }
+            }*/
         } else {
             //header没有带Bearer字段
             RenderUtil.renderJson(response, new JsonResult(BizExceptionEnum.TOKEN_ERROR.getCode(), BizExceptionEnum.TOKEN_ERROR.getMessage()));

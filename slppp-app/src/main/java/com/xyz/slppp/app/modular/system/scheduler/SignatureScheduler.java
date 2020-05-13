@@ -56,7 +56,7 @@ public class SignatureScheduler {
     @Autowired
     private UtxoTokenService utxoTokenService;
 
-    @Scheduled(cron = "0/5 * * * * ?")
+//    @Scheduled(cron = "0/5 * * * * ?")
     public void work() {
         self.start();
     }

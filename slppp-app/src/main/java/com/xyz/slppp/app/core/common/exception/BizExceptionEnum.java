@@ -116,17 +116,15 @@ public enum BizExceptionEnum implements AbstractBaseExceptionEnum {
 
     USER_NAME_PASSWORD_ERROR(10005, "用户名或密码错误"),
 
-    USER_PASSWORD_ERROR(10008, "密码错误"),
-
-    PASSWORD_MODIFIED_SUCCESS(200, "密码修改成功"),
-
-
-
 
 
 
 
     // token
+
+    USER_PASSWORD_ERROR(10008, "密码错误"),
+
+    USER_NOT_ERROR(10009, "用户不存在"),
 
     TOKEN_ISNULL_ERROR(4000001, "这个token不存在"),
 
