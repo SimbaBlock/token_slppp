@@ -1,6 +1,8 @@
 package com.slppp.app.modular.api;
 
-import com.slppp.app.core.mail.MailService;
+import com.slppp.app.config.shiro.ShiroKit;
+import com.slppp.app.core.common.exception.BizExceptionEnum;
+import com.slppp.app.core.constant.SecurityConsts;
 import com.slppp.app.core.util.JsonResult;
 import com.slppp.app.modular.system.model.Member;
 import com.slppp.app.modular.system.service.MemberService;
@@ -30,10 +32,6 @@ public class MemberController {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    @Autowired
-    private MailService mailService;
-
-
     /**
      * 用户注册
      * @param
@@ -44,19 +42,23 @@ public class MemberController {
     @RequestMapping("/register")
     public JsonResult register(String username, String password, String email, String privateKey, String code) {
 
-        String emailCode = (String)redisTemplate.opsForValue().get(email);
+        Integer emailCode = (Integer)redisTemplate.opsForValue().get(email);
 
-        if (!emailCode.equals(code))
-            System.out.println("验证码错误");
+        if (emailCode == null)
+            return new JsonResult(BizExceptionEnum.USER_REGISTER_CODE_ERROR.getCode(), BizExceptionEnum.USER_REGISTER_CODE_ERROR.getMessage());
+
+        if (!emailCode.equals(Integer.valueOf(code)))
+            return new JsonResult(BizExceptionEnum.USER_REGISTER_CODE_ERROR.getCode(), BizExceptionEnum.USER_REGISTER_CODE_ERROR.getMessage());
 
         Member member = memberService.findByUserName(username);
 
         if (member != null)
-            System.out.println("当前用户已存在");
+            return new JsonResult(BizExceptionEnum.USER_REGISTER_REPEAT_ERROR.getCode(), BizExceptionEnum.USER_REGISTER_REPEAT_ERROR.getMessage());
 
         Member Member = new Member();
         Member.setEmail(email);
-        Member.setPassword(password);
+        String encodePassword = ShiroKit.md5(password, SecurityConsts.LOGIN_SALT);
+        Member.setPassword(encodePassword);
         Member.setPrivateKey(privateKey);
         Member.setUsername(username);
         memberService.insert(Member);

@@ -1,6 +1,8 @@
 package com.slppp.app.modular.api;
 
 import com.google.common.collect.Maps;
+import com.slppp.app.config.shiro.security.JwtUtil;
+import com.slppp.app.core.constant.SecurityConsts;
 import com.slppp.app.modular.api.vo.TokenHistory;
 import com.slppp.app.modular.system.model.*;
 import com.slppp.app.modular.system.service.*;
@@ -8,6 +10,7 @@ import com.slppp.app.core.common.exception.BizExceptionEnum;
 import com.slppp.app.core.rpc.Api;
 import com.slppp.app.core.util.JsonResult;
 import org.apache.commons.io.FileUtils;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -50,6 +53,9 @@ public class ApiController {
 
 	@Autowired
 	private UtxoService utxoService;
+
+	@Autowired
+	private MemberService memberService;
 
 
 	@Value("${system-address}")
@@ -284,6 +290,8 @@ public class ApiController {
 		String backImg = jsonData.getString("back_img");
 		String phone = jsonData.getString("phone");
 
+		Member member = memberService.findByUserName(JwtUtil.getClaim(SecurityUtils.getSubject().getPrincipal().toString(), SecurityConsts.ACCOUNT));
+
 		KycAddress kycAddress = kycAddressService.selectAddress(address);
 
 		if (kycAddress != null)
@@ -296,7 +304,13 @@ public class ApiController {
 		KycAddress.setPositiveImg(positiveImg);
 		KycAddress.setBackImg(backImg);
 		KycAddress.setPhone(phone);
+		KycAddress.setMemberId(member.getId());
+
 		kycAddressService.insertKycAddress(KycAddress);
+		Member upmember = new Member();
+		upmember.setStatus(1);
+		upmember.setId(member.getId());
+		memberService.updateStatus(upmember);
 
 		String addressHash = Api.ValidateAddress(address).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
 

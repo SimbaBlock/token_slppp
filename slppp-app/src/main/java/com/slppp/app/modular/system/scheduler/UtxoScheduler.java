@@ -9,6 +9,7 @@ import com.slppp.app.modular.system.service.UtxoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -28,7 +29,7 @@ public class UtxoScheduler {
     @Autowired
     private UtxoService utxoService;
 
-//    @Scheduled(cron = "0/59 * * * * ?")
+    @Scheduled(cron = "0/59 * * * * ?")
     public void work() {
         self.start();
     }

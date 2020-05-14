@@ -11,10 +11,11 @@
 		<result column="positive_img" property="positiveImg" jdbcType="VARCHAR"/>
 		<result column="back_img" property="backImg" jdbcType="VARCHAR"/>
 		<result column="phone" property="phone" jdbcType="VARCHAR"/>
+		<result column="member_id" property="memberId" jdbcType="INTEGER"/>
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		id, address, name, id_number, positive_img, back_img, phone
+		id, address, name, id_number, positive_img, back_img, phone, member_id
 	</sql>
 
 	<select id="selectAddress" resultMap="BaseResultMap">
@@ -52,6 +53,9 @@
 			<if test="phone != null" >
 				phone,
 			</if>
+			<if test="memberId != null" >
+				member_id,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="address != null" >
@@ -71,6 +75,9 @@
 			</if>
 			<if test="phone != null" >
 				#{phone,jdbcType=VARCHAR},
+			</if>
+			<if test="memberId != null" >
+				#{memberId,jdbcType=INTEGER},
 			</if>
 		</trim>
 	</insert>

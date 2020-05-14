@@ -54,7 +54,7 @@ public class MemberServiceImpl implements MemberService {
 
         String encodePassword = ShiroKit.md5(password, SecurityConsts.LOGIN_SALT);
 
-        Member member = memberMapper.findByUserNameAndPassword(username, encodePassword);
+        Member member = memberMapper.findByUserName(username);
 
         if (member == null)
             return new JsonResult(BizExceptionEnum.USER_NOT_ERROR.getCode(), BizExceptionEnum.USER_NOT_ERROR.getMessage());
@@ -68,7 +68,12 @@ public class MemberServiceImpl implements MemberService {
         AuthenticationToken token = new JwtToken(strToken);
         subject.login(token);
 
-        return new JsonResult();
+        return new JsonResult().addData("private_key", member.getPrivateKey()).addData("status", member.getStatus());
+    }
+
+    @Override
+    public int updateStatus(Member member) {
+        return memberMapper.updateStatus(member);
     }
 
     /**

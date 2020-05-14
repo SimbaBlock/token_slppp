@@ -9,10 +9,11 @@
 		<result column="password" property="password" jdbcType="VARCHAR"/>
 		<result column="email" property="email" jdbcType="VARCHAR"/>
 		<result column="private_key" property="privateKey" jdbcType="VARCHAR"/>
+		<result column="status" property="status" jdbcType="INTEGER"/>
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		id, username, password, email, private_key
+		id, username, password, email, private_key, status
 	</sql>
 
 	<insert id="insert" parameterType="com.slppp.app.modular.system.model.Member">
@@ -58,5 +59,15 @@
 		<include refid="Base_Column_List" />
 		FROM `member` where username = #{username} and password = #{password}
 	</select>
+
+	<update id="updateStatus"  parameterType="com.slppp.app.modular.system.model.Member">
+		UPDATE member
+		<trim prefix= "set" suffixOverrides= ",">
+			<if test="status != null">
+				status = #{status},
+			</if>
+		</trim>
+		WHERE id = #{id}
+	</update>
 
 </mapper>

@@ -15,4 +15,6 @@ public interface MemberService {
 
     JsonResult login(String username, String password, HttpServletResponse response);
 
+    int updateStatus(Member member);
+
 }

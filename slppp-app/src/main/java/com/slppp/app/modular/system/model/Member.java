@@ -12,6 +12,8 @@ public class Member {
 
     private String privateKey;
 
+    private Integer status;
+
     public Integer getId() {
         return id;
     }
@@ -52,4 +54,11 @@ public class Member {
         this.privateKey = privateKey;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 }

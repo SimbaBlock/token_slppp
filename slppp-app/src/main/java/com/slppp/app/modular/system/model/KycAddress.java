@@ -16,6 +16,16 @@ public class KycAddress {
 
     private String phone;
 
+    private Integer memberId;
+
+    public Integer getMemberId() {
+        return memberId;
+    }
+
+    public void setMemberId(Integer memberId) {
+        this.memberId = memberId;
+    }
+
     public String getPhone() {
         return phone;
     }

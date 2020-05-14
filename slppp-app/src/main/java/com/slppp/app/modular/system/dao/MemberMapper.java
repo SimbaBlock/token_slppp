@@ -11,4 +11,6 @@ public interface MemberMapper {
 
     Member findByUserNameAndPassword(@Param("username") String username, @Param("password") String password);
 
+    int updateStatus(Member member);
+
 }
