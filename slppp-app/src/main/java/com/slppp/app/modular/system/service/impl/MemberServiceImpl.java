@@ -68,6 +68,7 @@ public class MemberServiceImpl implements MemberService {
         AuthenticationToken token = new JwtToken(strToken);
         subject.login(token);
 
+
         return new JsonResult().addData("private_key", member.getPrivateKey()).addData("status", member.getStatus());
     }
 
