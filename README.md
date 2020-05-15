@@ -94,7 +94,7 @@
     
 #查询用户TokenUTXO:
     
-    URL:/rest/Api/getUtxo
+    URL:/rest/Api/getTokenUtxo
     传参：
     	 address		string
     
