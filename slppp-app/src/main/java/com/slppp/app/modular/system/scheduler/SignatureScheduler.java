@@ -186,6 +186,7 @@ public class SignatureScheduler {
                     List<SlpSend> SlpSendList = new ArrayList<>();
                     List<TokenAssets> TokenAssetsList = new ArrayList<>();
                     List<UtxoToken> utxoTokenList = new ArrayList<>();
+                    List<Boolean> sendFlagList = new ArrayList<>();
                     boolean sendFlag = false;
                     for (Object v : vouts) {
 
@@ -199,6 +200,9 @@ public class SignatureScheduler {
                             String hex = open_hex.replaceFirst("76a914", "");
                             String hexStr = hex.substring(0, 40);
                             String first = hex.replaceFirst(hexStr + "88ac", "");
+
+                            if ("".equals(hexStr))
+                                continue;
 
                             if ("".equals(first))
                                 continue;
@@ -281,9 +285,10 @@ public class SignatureScheduler {
 
                                 String vouthex = scriptPubKey.getString("hex");
                                 String value = vout.getBigDecimal("value").toString();
-                                sendFlag = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time, hashmap, SlpSendList, TokenAssetsList, vouthex, value, utxoTokenList);
-                                if (!sendFlag)
-                                    break;
+                                Boolean f = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, time, hashmap, SlpSendList, TokenAssetsList, vouthex, value, utxoTokenList);
+
+                                if (f || sendFlag)
+                                    sendFlag = true;
 
                             }
                         }
@@ -291,6 +296,7 @@ public class SignatureScheduler {
                     }
 
                     if (sendFlag && hashmap.get(0).compareTo(hashmap.get(1)) >=0) {
+
                         flag = true;
                         if (SlpSendList != null) {
                             for (SlpSend s : SlpSendList) {
@@ -310,6 +316,24 @@ public class SignatureScheduler {
                             }
                         }
 
+                        if (hashmap.get(0).compareTo(hashmap.get(1)) > 0) {
+                            BigInteger amt = hashmap.get(0).subtract(hashmap.get(1));
+
+                            TokenDestruction tokenDestruction = new TokenDestruction();
+                            tokenDestruction.setAddress(tokenAssetss.get(0).getAddress());
+                            tokenDestruction.setTxid(txid);
+                            tokenDestruction.setN(tokenAssetss.get(0).getVout());
+                            tokenDestructionService.insertTokenDestruction(tokenDestruction);
+                            TokenAssets update = new TokenAssets();
+                            update.setTokenId(tokenAssetss.get(0).getTokenId());
+                            update.setStatus(3);
+                            update.setTxid(txid);
+                            update.setTime(new Date().getTime());
+                            update.setToken(amt);
+                            update.setAddress(tokenAssetss.get(0).getAddress());
+                            tokenAssetsService.insertTokenAssets(update);
+
+                        }
                     }
 
                     if (!flag && tokenAssetss != null) {            //销毁
@@ -383,10 +407,10 @@ public class SignatureScheduler {
             content = content.replaceFirst(token_document_url_hex, "");
             String token_document_url_str = content.substring(0, token_document_url * 2);
 
-            if (token_document_url_str == null) {
-                // 不能为空
-                return false;
-            }
+//            if (token_document_url_str == null) {
+//                // 不能为空
+//                return false;
+//            }
 
             content = content.replaceFirst(token_document_url_str, "");		// 清空掉url
             String tokenUrl = UnicodeUtil.hexStringToString(token_document_url_str);
@@ -396,10 +420,10 @@ public class SignatureScheduler {
             content = content.replaceFirst(token_document_hash_hex, "");
             String token_document_hash_str = content.substring(0, token_document_hash * 2);
 
-            if (token_document_hash_str == null) {
-                // 不能为空
-                return false;
-            }
+//            if (token_document_hash_str == null) {
+//                // 不能为空
+//                return false;
+//            }
             content = content.replaceFirst(token_document_hash_str, "");		// 清空掉hash
 
 
@@ -718,9 +742,6 @@ public class SignatureScheduler {
     //解析发送
     public boolean decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx, Long time, Map<Integer, BigInteger> hashmap, List<SlpSend> SlpSendList,
                                    List<TokenAssets> TokenAssetsList, String vouthex, String value,  List<UtxoToken> UtxoTokenList) {
-
-        if ("9f8907667919c1746b23fee959782c1b4d4f34849fd50988ff7c7db17ce22a4d".equals(tx))
-            System.out.println("asdasdasdsa");
 
         String token_id_hex = content.substring(0, 2);
 

@@ -52,9 +52,9 @@ public class UtxoScheduler {
                     sumValue = sumValue.add(new BigDecimal(utxo.getValue()));
                 }
 
-                if (sumValue.subtract(new BigDecimal("0.00005")).compareTo(new BigDecimal("0")) <= 0) {
+                if (sumValue.subtract(new BigDecimal("0.0005")).compareTo(new BigDecimal("0")) <= 0) {
 
-                    Api.SendToAddress(address, new BigDecimal("0.0001"));
+                    Api.SendToAddress(address, new BigDecimal("0.001"));
 
                 }
 

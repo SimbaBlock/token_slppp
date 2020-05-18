@@ -158,6 +158,51 @@
     }
 
 
+#发送邮件:
+
+    URL:/rest/member/sendEmail
+    传参：
+	    email		string
+
+    返回结果：  
+    {
+    	"code":200,
+    	"msg":""
+    }
+    
+#注册:
+
+    URL:/rest/member/register
+    传参：
+	    username        string
+        password        string
+        email           string
+        privateKey      string
+        code            string
+        
+    返回结果：  
+    {
+    	"code": 200,
+    	"msg": ""
+    }
+    
+
+#登陆:
+
+    URL:/rest/member/login
+    传参：
+	    username        string
+        password        string
+        
+    返回结果：  
+    {
+    	"code":200,
+    	"data":{
+    		"private_key":"2C82420A21756Fasd98765539DCA75F6FBE13B29CCD32EB0207C6151D8DF99635658F09DB269E75D85302BCC3D8C0DA3DDBE6BDE0DFE543EC4CE737750D6663CEA9C7D139707BC880CCF7BDCB7B45EF213E86B",
+    		"status": 0
+    	},
+    	"msg":""
+    }
 
 
 

@@ -9,10 +9,12 @@ import com.slppp.app.core.util.JedisUtils;
 import com.slppp.app.modular.system.service.ISyncCacheService;
 import com.slppp.app.core.common.exception.BizExceptionEnum;
 import com.slppp.app.core.util.JsonResult;
+import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -148,14 +150,13 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
                 return true;
             } catch (Exception e) {
                 String msg = e.getMessage();
-                Throwable throwable = e.getCause();
-                if (throwable != null && throwable instanceof SignatureVerificationException) {
-                    msg = String.format("Token或者密钥不正确(%s)",throwable.getMessage());
-                } else if (throwable != null && throwable instanceof TokenExpiredException) {
-                    msg = String.format("Token已过期(%s)",throwable.getMessage());
+                if ( e.getCause() != null &&  e instanceof SignatureVerificationException) {
+                    msg = String.format("Token或者密钥不正确(%s)",e.getMessage());
+                } else if (e != null && e instanceof TokenExpiredException) {
+                    msg = String.format("Token已过期(%s)",e.getMessage());
                 } else {
-                    if (throwable != null) {
-                        msg = throwable.getMessage();
+                    if (e != null) {
+                        msg = e.getMessage();
                     }
                 }
                 this.response401(response, msg);
@@ -186,14 +187,14 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
      */
     private void response401(ServletResponse resp, String msg) {
         HttpServletResponse httpServletResponse = (HttpServletResponse) resp;
-        httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+        httpServletResponse.setStatus(HttpStatus.OK.value());
         httpServletResponse.setCharacterEncoding("UTF-8");
         httpServletResponse.setContentType("application/json; charset=utf-8");
         PrintWriter out = null;
         try {
             out = httpServletResponse.getWriter();
 
-            JsonResult result = new JsonResult(BizExceptionEnum.USER_PASSWORD_ERROR.getCode(), BizExceptionEnum.USER_PASSWORD_ERROR.getMessage());
+            JsonResult result = new JsonResult(BizExceptionEnum.USER_PASSWORD_ERROR.getCode(), msg);
             out.append(JSON.toJSONString(result));
         } catch (IOException e) {
             logger.error("返回Response信息出现IOException异常:" + e.getMessage());
