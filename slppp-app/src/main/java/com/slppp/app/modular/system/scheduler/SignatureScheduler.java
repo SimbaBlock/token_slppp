@@ -130,7 +130,9 @@ public class SignatureScheduler {
             throw e;
         }
 
+
     }
+
 
     @Transactional(rollbackFor=Exception.class)
     public void block(JSONArray jsonArray) {
@@ -207,7 +209,54 @@ public class SignatureScheduler {
                             if ("".equals(first))
                                 continue;
 
-                            String OP_RETURN = first.replaceFirst("6a06534c502b2b00020201", "");
+                            first = first.replaceFirst("6a", "");
+
+                            String leng_hex = first.substring(0,2);
+                            first = first.replaceFirst(leng_hex, "");
+
+                            String OP_RETURN = "";
+                            if ("4c".equals(leng_hex)) {
+
+                                String length_hex = first.substring(0, 2);
+                                Integer length = UnicodeUtil.decodeHEX(length_hex);
+                                first = first.replaceFirst(length_hex, "");
+                                OP_RETURN = first.substring(0, length*2);
+                                first = first.replaceFirst(OP_RETURN,"");
+                                if (!"".equals(first))
+                                    continue;
+
+                            } else if ("4d".equals(leng_hex)) {
+
+                                String length_hex = first.substring(0, 4);
+                                Integer length = UnicodeUtil.decodeHEX(length_hex);
+                                first = first.replaceFirst(length_hex, "");
+                                OP_RETURN = first.substring(0, length*2);
+                                first = first.replaceFirst(OP_RETURN,"");
+                                if (!"".equals(first))
+                                    continue;
+
+                            } else if ("4e".equals(leng_hex)) {
+
+                                String length_hex = first.substring(0, 6);
+                                Integer length = UnicodeUtil.decodeHEX(length_hex);
+                                first = first.replaceFirst(length_hex, "");
+                                OP_RETURN = first.substring(0, length*2);
+                                first = first.replaceFirst(OP_RETURN,"");
+                                if (!"".equals(first))
+                                    continue;
+
+                            } else {
+
+                                Integer length = UnicodeUtil.decodeHEX(leng_hex);
+                                first = first.replaceFirst(leng_hex, "");
+                                OP_RETURN = first.substring(0, length*2);
+                                first = first.replaceFirst(OP_RETURN,"");
+                                if (!"".equals(first))
+                                    continue;
+
+                            }
+
+                            OP_RETURN = OP_RETURN.replaceFirst("06534c502b2b00020201", "");
 
                             if ("".equals(OP_RETURN))
                                 continue;
@@ -221,6 +270,7 @@ public class SignatureScheduler {
                             if (token_type * 2 > OP_RETURN.length())
                                 continue;
 
+
                             String token_type_str = OP_RETURN.substring(0, token_type * 2);
                             OP_RETURN = OP_RETURN.replaceFirst(token_type_str, "");
 
@@ -229,7 +279,8 @@ public class SignatureScheduler {
                                 String tokenid = "";
 
                                 try {
-                                    tokenid = UnicodeUtil.getSHA256(open_hex);
+                                    String nn = UnicodeUtil.intToHex(n);
+                                    tokenid = UnicodeUtil.getSHA256(txid + nn);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

@@ -34,7 +34,7 @@
 		SELECT
 		<include refid="Base_Column_List" />
 		FROM
-		`genesis_address` where raise_address = #{raiseAddress}
+		`genesis_address` where raise_address = #{raiseAddress} and txid = #{tokenId}
 	</select>
 
 	<update id="updateGensisAddress"  parameterType="com.slppp.app.modular.system.model.GenesisAddress">

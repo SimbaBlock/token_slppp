@@ -279,11 +279,11 @@ public class BitClient {
 	}
 
 	public String getRawTransactionHex(String txid, Boolean format) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
-		return JSON.stringify(query("getrawtransaction", txid, format));
+		return JSONObject.toJSONString(query("getrawtransaction", txid, format));
 	}
 
 	public String decodeRawTransaction(String hex) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
-		return JSON.stringify(query("decoderawtransaction", hex));
+		return JSONObject.toJSONString(query("decoderawtransaction", hex));
 	}
 
 	public String getNewAddress() throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
