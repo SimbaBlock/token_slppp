@@ -11,7 +11,7 @@ public interface GenesisAddressMapper {
 
     int updateGensisAddress(GenesisAddress genesisAddress);
 
-    GenesisAddress findRaiseAddress(String raiseAddress);
+    GenesisAddress findRaiseAddress(@Param("raiseAddress") String raiseAddress, @Param("tokenId") String tokenId);
 
     GenesisAddress findByRaiseTxidAndRaiseVout(@Param("raiseTxid") String raiseTxid, @Param("raiseVout") Integer raiseVout);
 

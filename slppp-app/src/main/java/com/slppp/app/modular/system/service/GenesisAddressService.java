@@ -10,7 +10,7 @@ public interface GenesisAddressService {
 
     int updateGensisAddress(GenesisAddress genesisAddress);
 
-    GenesisAddress findRaiseAddress(String raiseAddress);
+    GenesisAddress findRaiseAddress(String raiseAddress, String tokenId);
 
     GenesisAddress findByRaiseTxidAndRaiseVout(String raiseTxid, Integer raiseVout);
 

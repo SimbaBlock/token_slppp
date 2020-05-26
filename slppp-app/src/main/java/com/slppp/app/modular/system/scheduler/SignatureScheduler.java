@@ -207,7 +207,54 @@ public class SignatureScheduler {
                             if ("".equals(first))
                                 continue;
 
-                            String OP_RETURN = first.replaceFirst("6a06534c502b2b00020201", "");
+                            first = first.replaceFirst("6a", "");
+
+                            String leng_hex = first.substring(0,2);
+                            first = first.replaceFirst(leng_hex, "");
+
+                            String OP_RETURN = "";
+                            if ("4c".equals(leng_hex)) {
+
+                                String length_hex = first.substring(0, 2);
+                                Integer length = UnicodeUtil.decodeHEX(length_hex);
+                                first = first.replaceFirst(length_hex, "");
+                                OP_RETURN = first.substring(0, length*2);
+                                first = first.replaceFirst(OP_RETURN,"");
+                                if (!"".equals(first))
+                                    continue;
+
+                            } else if ("4d".equals(leng_hex)) {
+
+                                String length_hex = first.substring(0, 4);
+                                Integer length = UnicodeUtil.decodeHEX(length_hex);
+                                first = first.replaceFirst(length_hex, "");
+                                OP_RETURN = first.substring(0, length*2);
+                                first = first.replaceFirst(OP_RETURN,"");
+                                if (!"".equals(first))
+                                    continue;
+
+                            } else if ("4e".equals(leng_hex)) {
+
+                                String length_hex = first.substring(0, 6);
+                                Integer length = UnicodeUtil.decodeHEX(length_hex);
+                                first = first.replaceFirst(length_hex, "");
+                                OP_RETURN = first.substring(0, length*2);
+                                first = first.replaceFirst(OP_RETURN,"");
+                                if (!"".equals(first))
+                                    continue;
+
+                            } else {
+
+                                Integer length = UnicodeUtil.decodeHEX(leng_hex);
+                                first = first.replaceFirst(leng_hex, "");
+                                OP_RETURN = first.substring(0, length*2);
+                                first = first.replaceFirst(OP_RETURN,"");
+                                if (!"".equals(first))
+                                    continue;
+
+                            }
+
+                            OP_RETURN = OP_RETURN.replaceFirst("06534c502b2b00020201", "");
 
                             if ("".equals(OP_RETURN))
                                 continue;
@@ -229,7 +276,8 @@ public class SignatureScheduler {
                                 String tokenid = "";
 
                                 try {
-                                    tokenid = UnicodeUtil.getSHA256(open_hex);
+                                    String nn = UnicodeUtil.intToHex(n);
+                                    tokenid = UnicodeUtil.getSHA256(txid + nn);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -254,31 +302,21 @@ public class SignatureScheduler {
 
                             } else if ("4d494e54".equals(token_type_str)) {
 
-                                boolean f = false;
+                                String vouthex = scriptPubKey.getString("hex");
+                                String value = vout.getBigDecimal("value").toString();
+                                boolean bl = false;
 
                                 try {
-                                    f = mintVins(vins);         //判断有没有增发权限
+                                    bl = decodeMinttoken(vins, OP_RETURN, map, hexStr, txid, n, time, vouthex, value);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
 
-                                if (f) {
-                                    String vouthex = scriptPubKey.getString("hex");
-                                    String value = vout.getBigDecimal("value").toString();
-                                    boolean bl = false;
-
-                                    try {
-                                        bl = decodeMinttoken(OP_RETURN, map, hexStr, txid, n, time, vouthex, value);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-
-                                    if (bl)
-                                        flag = true;
-                                    else {
-                                        flag = false;
-                                        break;
-                                    }
+                                if (bl)
+                                    flag = true;
+                                else {
+                                    flag = false;
+                                    break;
                                 }
 
                             } else if ("53454e44".equals(token_type_str)) {
@@ -526,7 +564,7 @@ public class SignatureScheduler {
 
     // 解析增发
     @Transactional(rollbackFor=Exception.class)
-    public boolean decodeMinttoken(String content, Map<Integer, String> map, String hexStr, String tx, Integer n, Long time, String vouthex, String value) {
+    public boolean decodeMinttoken(JSONArray vins, String content, Map<Integer, String> map, String hexStr, String tx, Integer n, Long time, String vouthex, String value) {
 
         try {
 
@@ -575,6 +613,17 @@ public class SignatureScheduler {
             if (slp == null)
                 return false;   // 不存在token
 
+            boolean f = false;
+
+            try {
+                f = mintVins(vins, token_id_str);         // 判断有没有增发权限
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (!f) {
+                return false;
+            }
 
             SlpMint slpMint = new SlpMint();
             slpMint.setTransactionType("mint");
@@ -591,7 +640,6 @@ public class SignatureScheduler {
             genesisAddress.setRaiseVout(mintVout);
             genesisAddress.setRaiseTxid(tx);
             genesisAddressService.updateGensisAddress(genesisAddress);
-
 
             TokenAssets tokenAssets = new TokenAssets();
             tokenAssets.setAddress(hexStr);
@@ -637,8 +685,7 @@ public class SignatureScheduler {
 
     }
 
-    public boolean mintVins(JSONArray vins) throws Exception {
-
+    public boolean mintVins(JSONArray vins, String tokenId) throws Exception {
 
         for (Object v: vins) {
 
@@ -649,7 +696,7 @@ public class SignatureScheduler {
             JSONObject vv = vout.getJSONObject(vin.getInteger("vout"));
             String addressHash = vv.getJSONObject("scriptPubKey").getString("hex").replaceFirst("76a914","").replaceFirst("88ac","");
 
-            GenesisAddress genesisAddress = genesisAddressService.findRaiseAddress(addressHash);
+            GenesisAddress genesisAddress = genesisAddressService.findRaiseAddress(addressHash, tokenId);
 
             if (genesisAddress != null)
                 return true;

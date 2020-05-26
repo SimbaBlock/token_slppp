@@ -45,8 +45,10 @@ public class GlobalExceptionHandler {
     public JsonResult invalidBitcoinAddress(XsvException.InvalidBitcoinAddressException e) {
         if (e.getCode() == -5)
              return new JsonResult(BizExceptionEnum.INVALID_BITCOIN_ADDRESS_ERROR.getCode(), BizExceptionEnum.INVALID_BITCOIN_ADDRESS_ERROR.getMessage());
-        else
+        else if (e.getCode() == -25)
             return new JsonResult(BizExceptionEnum.MISSING_INPUTS_ERROR.getCode(), BizExceptionEnum.MISSING_INPUTS_ERROR.getMessage());
+        else
+            return new JsonResult(e.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(ParamException.ParamLengthException.class)

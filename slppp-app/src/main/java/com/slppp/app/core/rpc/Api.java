@@ -193,20 +193,6 @@ public class Api {
 
 	}
 
-//	/**
-//	 * 获取指定哈希的区块
-//	 * @param
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	public static wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient.Block GetBlock(String blockHash) throws Exception {
-//
-//		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
-//		BitcoinJSONRPCClient bitcoinClient = new BitcoinJSONRPCClient(url);
-//		Block JSON = bitcoinClient.getBlock(blockHash);
-//		return JSON;
-//
-//	}
 
 	/**
 	 * 获取指定哈希的区块
@@ -323,7 +309,7 @@ public class Api {
 	 */
 	public static String SendToAddress(String address, BigDecimal amount) throws Exception {
 
-		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		URL url = new URL("http://" + user + ':' + password + "@" + "116.62.126.223" + ":" + port + "/");
 		BitClient bitClient = new BitClient(url);
 		String relust = bitClient.sendToAddress(address, amount);
 		return relust;
