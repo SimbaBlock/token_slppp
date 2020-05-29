@@ -30,7 +30,7 @@
 
 
 ## broadcasttx
->上链  
+>广播  
 >/rest/Api/broadcastTx
 ```
     传参:
@@ -48,7 +48,7 @@
     }
 ```
 ## kyc
->用户kyc
+>用户kyc   
 >/rest/Api/kyc
 ```
     传参：
@@ -67,7 +67,7 @@
 ```
 
 ## query token
->查询用户token
+>查询用户token    
 >/rest/Api/queryToken
 ```
     传参：
@@ -85,7 +85,7 @@
     }
 ```
 ## getutxo
->查询用户UTXO
+>查询用户UTXO   
 >/rest/Api/getUtxo
 ```
     传参：
@@ -109,7 +109,7 @@
         }
 ```    
 ## get token utxo
->查询用户TokenUTXO:
+>查询用户TokenUTXO   
 >/rest/Api/getTokenUtxo
 ```
     传参：
@@ -133,7 +133,7 @@
         }
 ```
 ## get token history
->查询地址历史交易记录
+>查询地址历史交易记录   
 >/rest/Api/getTokenHistory
 ```
     传参：
@@ -177,7 +177,7 @@
 ```
 
 ## send email
->发送邮件:
+>发送邮件   
 >/rest/member/sendEmail
 ```
     传参：
@@ -190,7 +190,7 @@
     }
 ```    
 ## register
->注册
+>注册   
 >/rest/member/register
 ```
     传参：
@@ -208,7 +208,7 @@
 ```    
 
 ## login
->登录
+>登录   
 >/rest/member/login
 ```
     传参：
