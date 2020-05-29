@@ -30,8 +30,8 @@ public class GenesisAddressServiceImpl implements GenesisAddressService {
     }
 
     @Override
-    public GenesisAddress findRaiseAddress(String raiseAddress) {
-        return genesisAddressMapper.findRaiseAddress(raiseAddress);
+    public GenesisAddress findRaiseAddress(String raiseAddress, String tokenId) {
+        return genesisAddressMapper.findRaiseAddress(raiseAddress, tokenId);
     }
 
     @Override
