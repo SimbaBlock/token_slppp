@@ -54,7 +54,7 @@
     传参：
     {
 	    "address": "18RnWjAjSjYwVC7juVypnsUAmvNGMJ72vH",
-	    "name": "利斯海",
+	    "name": "name",
 	    "ID_number": "321312312312312312312312312" 
     }
     
