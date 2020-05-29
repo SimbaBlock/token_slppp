@@ -1,5 +1,13 @@
-通用：
-		
+# slpppJ
+
+[1. broadcasttx](#broadcasttx)
+[2. kyc](#kyc)
+[3. token](#query-token)
+[4. token utxo](#get-token-utxo)
+[5. token history](#get-token-history)
+
+
+## 通用
 	错误码：
 	{"code":"400","data":"","msg":"请求数据格式不正确"}
 	{"code":"500","data":"","msg":"服务器异常"}
@@ -17,9 +25,10 @@
 	{"code":"4000013","data":"","msg":"上链失败"}
 
 
-#上链:  
-
-    URL:/rest/Api/broadcastTx
+## broadcasttx
+>广播   
+>/rest/Api/broadcastTx
+```
     传参:
     {
     	"hex": "0200000002aa8f24d4548a90ec3871a00e80049a27f46405"
@@ -33,10 +42,11 @@
     		"txid": "sadjlaslkjdalskjdalksjdaksldasdas"
     	}
     }
-
-#用户kyc:
-
-    URL:/rest/Api/kyc
+```
+## kyc 
+>用户kyc    
+>/rest/Api/kyc
+```
     传参：
     {
 	    "address": "18RnWjAjSjYwVC7juVypnsUAmvNGMJ72vH",
@@ -50,11 +60,12 @@
     	"msg": "",
     	"data":""
     }
+```
 
-
-#查询用户tonken:
-
-    URL:/rest/Api/queryToken
+## query token
+>查询用户tonken    
+>/rest/Api/queryToken
+```
     传参：
 	    tokenId		string
 	    address		string
@@ -68,10 +79,11 @@
     		"precition": 8
     	}
     }
-
-#查询用户UTXO:
-
-    URL:/rest/Api/getUtxo
+```
+## getutxo
+>查询用户UTXO   
+>/rest/Api/getUtxo
+```
     传参：
 	    address		string
 
@@ -91,10 +103,11 @@
    	 },
    	 "msg":""
     }
-    
-#查询用户TokenUTXO:
-    
-    URL:/rest/Api/getTokenUtxo
+```    
+## get token utxo
+>查询用户TokenUTXO   
+>/rest/Api/getTokenUtxo
+```
     传参：
     	 address		string
     
@@ -114,10 +127,11 @@
        	 },
        	 "msg":""
      }
-
-#查询地址历史交易记录:
-
-    URL:/rest/Api/getTokenHistory
+```
+## get token history
+>查询地址历史交易记录   
+>/rest/Api/getTokenHistory
+```
     传参：
 	    address		string
 
@@ -156,7 +170,7 @@
    	},
    	"msg":""
     }
-
+```
 
 
 
