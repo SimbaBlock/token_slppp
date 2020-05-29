@@ -9,7 +9,7 @@
 ### [6. token history](#get-token-history)
 ### [7. send email](#send-email)
 ### [8. register](#register)
-### [9. login(#login)
+### [9. login](#login)
 
 ## 通用
 	错误码：
