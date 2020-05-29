@@ -510,15 +510,14 @@ public class SignatureScheduler {
                             Integer f = decode(1, scriptPubKey, vout, n, txid, map, vins, hashmap, SlpSendList,
                                     TokenAssetsList, utxoTokenList, flag, open_hex, hexStr,  null, null);
 
-                            switch (f) {
-                                case 1 :
-                                    continue;
-                                case 2 :
-                                    break;
-                                case 3 :
-                                    flag = false;
-                                case 4 :
-                                    flag = true;
+                            if (f == 1) {
+                                continue;
+                            } else if (f == 2) {
+                                break;
+                            } else if (f == 3) {
+                                flag = false;
+                            } else if (f == 4) {
+                                flag = true;
                             }
 
                         }
