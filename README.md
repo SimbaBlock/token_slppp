@@ -1,5 +1,17 @@
-通用：
-		
+# slpppJ
+
+## 目录
+[1. broadcast](#broadcasttx)   
+[2. kyc](#kyc)  
+[3. token](#query-token)  
+[4. utxo](#getutxo)  
+[5. token utxo](#get-token-utxo)  
+[6. token history](#get-token-history)   
+[7. send email](#send-email)  
+[8. register](#register)  
+[9. login](#login)   
+
+## 通用
 	错误码：
 	{"code":"400","data":"","msg":"请求数据格式不正确"}
 	{"code":"500","data":"","msg":"服务器异常"}
@@ -17,9 +29,10 @@
 	{"code":"4000013","data":"","msg":"上链失败"}
 
 
-#上链:  
-
-    URL:/rest/Api/broadcastTx
+## broadcasttx
+>广播  
+>/rest/Api/broadcastTx
+```
     传参:
     {
     	"hex": "0200000002aa8f24d4548a90ec3871a00e80049a27f46405"
@@ -33,14 +46,15 @@
     		"txid": "sadjlaslkjdalskjdalksjdaksldasdas"
     	}
     }
-
-#用户kyc:
-
-    URL:/rest/Api/kyc
+```
+## kyc
+>用户kyc   
+>/rest/Api/kyc
+```
     传参：
     {
 	    "address": "18RnWjAjSjYwVC7juVypnsUAmvNGMJ72vH",
-	    "name": "利斯海",
+	    "name": "name",
 	    "ID_number": "321312312312312312312312312" 
     }
     
@@ -50,11 +64,12 @@
     	"msg": "",
     	"data":""
     }
+```
 
-
-#查询用户tonken:
-
-    URL:/rest/Api/queryToken
+## query token
+>查询用户token    
+>/rest/Api/queryToken
+```
     传参：
 	    tokenId		string
 	    address		string
@@ -68,10 +83,11 @@
     		"precition": 8
     	}
     }
-
-#查询用户UTXO:
-
-    URL:/rest/Api/getUtxo
+```
+## getutxo
+>查询用户UTXO   
+>/rest/Api/getUtxo
+```
     传参：
 	    address		string
 
@@ -91,10 +107,11 @@
           	 },
           	 "msg":""
         }
-    
-#查询用户TokenUTXO:
-    
-    URL:/rest/Api/getTokenUtxo
+```    
+## get token utxo
+>查询用户TokenUTXO   
+>/rest/Api/getTokenUtxo
+```
     传参：
     	 address		string
     
@@ -114,10 +131,11 @@
           	 },
           	 "msg":""
         }
-
-#查询地址历史交易记录:
-
-    URL:/rest/Api/getTokenHistory
+```
+## get token history
+>查询地址历史交易记录   
+>/rest/Api/getTokenHistory
+```
     传参：
 	    address		string
 
@@ -156,11 +174,12 @@
    	},
    	"msg":""
     }
+```
 
-
-#发送邮件:
-
-    URL:/rest/member/sendEmail
+## send email
+>发送邮件   
+>/rest/member/sendEmail
+```
     传参：
 	    email		string
 
@@ -169,10 +188,11 @@
     	"code":200,
     	"msg":""
     }
-    
-#注册:
-
-    URL:/rest/member/register
+```    
+## register
+>注册   
+>/rest/member/register
+```
     传参：
 	    username        string
         password        string
@@ -185,11 +205,12 @@
     	"code": 200,
     	"msg": ""
     }
-    
+```    
 
-#登陆:
-
-    URL:/rest/member/login
+## login
+>登录   
+>/rest/member/login
+```
     传参：
 	    username        string
         password        string
@@ -204,7 +225,7 @@
     	"msg":""
     }
 
-
+```
 
 
 
