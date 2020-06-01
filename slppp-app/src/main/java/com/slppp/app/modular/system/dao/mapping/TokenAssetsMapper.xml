@@ -43,7 +43,7 @@
 		SELECT
 			token
 		FROM
-		`token_assets` where txid = #{txid} and vout = #{vout}
+		`token_assets` where txid = #{txid} and vout = #{vout} and token_id = #{tokenId}
 	</select>
 
 	<select id="selectFromAddressTokenStatus" resultType="java.math.BigInteger">
@@ -81,7 +81,7 @@
 		SELECT
 			*
 		FROM
-		`token_assets` where txid = #{txid} and vout = #{vout}
+		`token_assets` where txid = #{txid} and vout = #{vout} and token_id = #{tokenId}
 	</select>
 
 	<select id="findByTokenAssetsStatus" resultType="com.slppp.app.modular.system.model.TokenAssets">

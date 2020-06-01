@@ -254,6 +254,44 @@ public class BitClient {
 
 	}
 
+	public String createDrivetx(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
+		List<Map> pInputs = new ArrayList<>();
+
+		for (final TxInputDto txInput : inputs) {
+			pInputs.add(new LinkedHashMap() {
+				{
+					put("txid", txInput.txid());
+					put("vout", txInput.vout());
+				}
+			});
+		}
+
+		List<Map> pOutputs = new ArrayList<>();
+
+		for (CommonTxOputDto commonTxOputDto : outputs) {
+			pOutputs.add(new LinkedHashMap() {
+				{
+					if(commonTxOputDto.getType()==1) {
+						put("address", commonTxOputDto.getAddresss());
+						put("amount", commonTxOputDto.getAmount());
+						put("metadata", commonTxOputDto.getMetadata());
+					} else if(commonTxOputDto.getType()==2) {
+						put("address", commonTxOputDto.getAddresss());
+						put("amount", commonTxOputDto.getAmount());
+					} else if(commonTxOputDto.getType()==3){
+						put("data", commonTxOputDto.getData());
+					}
+				}
+			});
+		}
+		return (String) query("createdrivetx", pInputs, pOutputs);
+	}
+
+	public String signDrivetx(String hex, String address) throws XsvException.InvalidBitcoinAddressException {
+		Map result = (Map) query("signdrivetx", hex, address); // if sigHashType is
+		return (String) result.get("hex");
+	}
+
 
 	// 签名认证
 	public String signRawTransaction(String hex) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {

@@ -39,8 +39,8 @@ public class TokenAssetsServiceImpl implements TokenAssetsService {
     }
 
     @Override
-    public TokenAssets findByTokenAssets(String txid, Integer vout) {
-        return tokenAssetsMapper.findByTokenAssets(txid, vout);
+    public TokenAssets findByTokenAssets(String tokenId, String txid, Integer vout) {
+        return tokenAssetsMapper.findByTokenAssets(tokenId, txid, vout);
     }
 
     @Override
@@ -54,8 +54,8 @@ public class TokenAssetsServiceImpl implements TokenAssetsService {
     }
 
     @Override
-    public BigInteger selectFAToken(String txid, Integer vout) {
-        return tokenAssetsMapper.selectFAToken(txid, vout);
+    public BigInteger selectFAToken(String tokenId, String txid, Integer vout) {
+        return tokenAssetsMapper.selectFAToken(tokenId, txid, vout);
     }
 
     @Override

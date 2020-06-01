@@ -316,4 +316,23 @@ public class Api {
 
 	}
 
+
+	public static String CreateDrivetx(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.createDrivetx(inputs, outputs);
+		return relust;
+
+	}
+
+	public static String SignDrivetx(String hex, String address) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.signDrivetx(hex, address);
+		return relust;
+
+	}
+
 }

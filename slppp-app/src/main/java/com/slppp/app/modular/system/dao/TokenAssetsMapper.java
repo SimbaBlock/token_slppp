@@ -18,13 +18,13 @@ public interface TokenAssetsMapper {
 
     int selectAddressCount(String address);
 
-    TokenAssets findByTokenAssets(@Param("txid") String txid, @Param("vout") Integer vout);
+    TokenAssets findByTokenAssets(@Param("tokenId") String tokenId, @Param("txid") String txid, @Param("vout") Integer vout);
 
     BigInteger selectFromAddressToken(@Param("tokenId") String tokenId, @Param("address") String address);
 
     List<TokenAssets> selectByTxid(@Param("txid") String txid);
 
-    BigInteger selectFAToken(@Param("txid")String txid, @Param("vout") Integer vout);
+    BigInteger selectFAToken(@Param("tokenId") String tokenId, @Param("txid") String txid, @Param("vout") Integer vout);
 
     List<TokenHistory> selectHistory(Map<String, Object> query);
 

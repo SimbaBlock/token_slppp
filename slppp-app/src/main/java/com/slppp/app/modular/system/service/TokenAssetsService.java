@@ -17,13 +17,13 @@ public interface TokenAssetsService {
 
     int selectAddressCount(String address);
 
-    TokenAssets findByTokenAssets(String txid, Integer vout);
+    TokenAssets findByTokenAssets(String tokenId, String txid, Integer vout);
 
     BigInteger selectFromAddressToken(String tokenId, String address);
 
     List<TokenAssets> selectByTxid(String txid);
 
-    BigInteger selectFAToken(String txid, Integer vout);
+    BigInteger selectFAToken(String tokenId, String txid, Integer vout);
 
     List<TokenHistory> selectHistory(Map<String, Object> query);
 
