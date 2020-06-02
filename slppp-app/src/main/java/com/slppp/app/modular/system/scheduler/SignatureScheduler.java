@@ -17,10 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -337,6 +335,8 @@ public class SignatureScheduler {
 
             if (sendFlag)
                 flag = false;
+            else
+                flag = true;
 
         }
 
@@ -598,7 +598,7 @@ public class SignatureScheduler {
                         }
                     }
 
-                    if (!flag && tokenAssetss != null) {            //销毁
+                    if (!flag && (tokenAssetss != null || scriptTokenLink != null)) {            //销毁
 
                         if (tokenAssetss != null) {
 
@@ -896,13 +896,13 @@ public class SignatureScheduler {
 
             String mintAddress = map.get(mintVout).replaceFirst("76a914","").replaceFirst("88ac","");   //增发权限地址
 
+            Slp slp = slpService.findByTokenId(token_id_str);
+            ScriptSlp scriptSlp = scriptSlpService.findByTokenId(token_id_str);
+            if (slp == null && scriptSlp == null) {
+                return false;   // 不存在token
+            }
 
             if (type == 1) {
-
-                Slp slp = slpService.findByTokenId(token_id_str);
-
-                if (slp == null)
-                    return false;   // 不存在token
 
                 boolean f = false;
 
@@ -951,11 +951,6 @@ public class SignatureScheduler {
                 utxoTokenService.insertUtxoToken(UtxoToken);
 
             } else if (type == 2) {
-
-                ScriptSlp scriptSlp = scriptSlpService.findByTokenId(token_id_str);
-
-                if (scriptSlp == null)
-                    return false;   // 不存在token
 
                 boolean f = false;
 
@@ -1200,21 +1195,20 @@ public class SignatureScheduler {
             Integer vout = vin.getInteger("vout");
 
             TokenAssets assets = tokenAssetsService.findByTokenAssets(token_id_str, txid, vout);
+            ScriptTokenLink ScriptAssets = scriptTokenLinkService.findByTokenAssets(token_id_str, txid, vout);
 
             if (assets != null) {
                 assetsList.add(assets);
                 ty.put("tokenAssets", 1);
-            }
-
-            ScriptTokenLink ScriptAssets = scriptTokenLinkService.findByTokenAssets(token_id_str, txid, vout);
-            if (ScriptAssets != null) {
+            } else if (ScriptAssets != null) {
                 assetsList.add(ScriptAssets);
                 ty.put("scriptAssets", 1);
             }
 
         }
 
-        String fromAddress = null;
+
+        Set<String> fromAddress = new HashSet<>();
         BigInteger newBig = new BigInteger("0");
 
         if (assetsList != null && assetsList.size() > 0) {
@@ -1224,13 +1218,13 @@ public class SignatureScheduler {
                 if (tokenAssets instanceof TokenAssets) {
                     TokenAssets t = (TokenAssets)tokenAssets;
                     fromToken = tokenAssetsService.selectFAToken(token_id_str, t.getTxid(), t.getVout());                     // 查询地址的
-                    if (StringUtils.isEmpty(fromAddress))
-                        fromAddress = t.getAddress();
+//                    if (StringUtils.isEmpty(fromAddress))
+                        fromAddress.add(t.getAddress());
                 } else if (tokenAssets instanceof  ScriptTokenLink) {
                     ScriptTokenLink t = (ScriptTokenLink)tokenAssets;
                     fromToken = scriptTokenLinkService.selectFAToken(token_id_str, t.getTxid(), t.getVout());                 // 查询脚本的
-                    if (StringUtils.isEmpty(fromAddress))
-                        fromAddress = t.getScript();
+//                    if (StringUtils.isEmpty(fromAddress))
+                        fromAddress.add(t.getScript());
                 }
                 if (fromToken != null) {
                     newBig = newBig.add(fromToken);
@@ -1259,36 +1253,38 @@ public class SignatureScheduler {
             SlpSendList.add(slpSend);
 
 
-            TokenAssets tokenAssets = new TokenAssets();
-            if (fromAddress.equals(toAddressHash)) {
-                tokenAssets.setStatus(4);
-            } else {
-                tokenAssets.setStatus(2);
-            }
-            tokenAssets.setAddress(toAddressHash);
-            tokenAssets.setTokenId(token_id_str);
-            tokenAssets.setTxid(tx);
-            tokenAssets.setVout(n);
-            tokenAssets.setToken(quantity_int);
-            tokenAssets.setFromAddress(fromAddress);
-            tokenAssets.setTime(new Date().getTime());
-            TokenAssetsList.add(tokenAssets);
-
-            Integer scriptAssets = ty.get("scriptAssets");
-            if (scriptAssets != null && scriptAssets == 1) {
-                ScriptTokenLink scriptTokenLink = new ScriptTokenLink();
-                if (fromAddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
-                    scriptTokenLink.setStatus(4);
+            for (String fa : fromAddress) {
+                TokenAssets tokenAssets = new TokenAssets();
+                if (fromAddress.equals(toAddressHash)) {
+                    tokenAssets.setStatus(4);
                 } else {
-                    scriptTokenLink.setStatus(2);
+                    tokenAssets.setStatus(2);
                 }
-                scriptTokenLink.setScript(toAddressHash);
-                scriptTokenLink.setTokenId(token_id_str);
-                scriptTokenLink.setTxid(tx);
-                scriptTokenLink.setVout(n);
-                scriptTokenLink.setToken(quantity_int);
-                scriptTokenLink.setFromScript(fromAddress);
-                TokenAssetsList.add(scriptTokenLink);
+                tokenAssets.setAddress(toAddressHash);
+                tokenAssets.setTokenId(token_id_str);
+                tokenAssets.setTxid(tx);
+                tokenAssets.setVout(n);
+                tokenAssets.setToken(quantity_int);
+                tokenAssets.setFromAddress(fa);
+                tokenAssets.setTime(new Date().getTime());
+                TokenAssetsList.add(tokenAssets);
+
+                Integer scriptAssets = ty.get("scriptAssets");
+                if (scriptAssets != null && scriptAssets == 1) {
+                    ScriptTokenLink scriptTokenLink = new ScriptTokenLink();
+                    if (fromAddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
+                        scriptTokenLink.setStatus(4);
+                    } else {
+                        scriptTokenLink.setStatus(2);
+                    }
+                    scriptTokenLink.setScript(toAddressHash);
+                    scriptTokenLink.setTokenId(token_id_str);
+                    scriptTokenLink.setTxid(tx);
+                    scriptTokenLink.setVout(n);
+                    scriptTokenLink.setToken(quantity_int);
+                    scriptTokenLink.setFromScript(fa);
+                    TokenAssetsList.add(scriptTokenLink);
+                }
             }
 
             UtxoToken UtxoToken = new UtxoToken();
@@ -1309,37 +1305,38 @@ public class SignatureScheduler {
             scriptSlpSend.setTxid(tx);
             SlpSendList.add(scriptSlpSend);
 
-            ScriptTokenLink scriptTokenLink = new ScriptTokenLink();
-            if (fromAddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
-                scriptTokenLink.setStatus(4);
-            } else {
-                scriptTokenLink.setStatus(2);
-            }
-            scriptTokenLink.setScript(toAddressHash);
-            scriptTokenLink.setTokenId(token_id_str);
-            scriptTokenLink.setTxid(tx);
-            scriptTokenLink.setVout(n);
-            scriptTokenLink.setToken(quantity_int);
-            scriptTokenLink.setFromScript(fromAddress);
-            TokenAssetsList.add(scriptTokenLink);
-            Integer tokenAssetsMap = ty.get("tokenAssets");
-            if (tokenAssetsMap != null && tokenAssetsMap == 1) {
-                TokenAssets tokenAssets = new TokenAssets();
-                if (fromAddress.equals(toAddressHash)) {
-                    tokenAssets.setStatus(4);
+            for (String fa : fromAddress) {
+                ScriptTokenLink scriptTokenLink = new ScriptTokenLink();
+                if (fromAddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
+                    scriptTokenLink.setStatus(4);
                 } else {
-                    tokenAssets.setStatus(2);
+                    scriptTokenLink.setStatus(2);
                 }
-                tokenAssets.setAddress(toAddressHash);
-                tokenAssets.setTokenId(token_id_str);
-                tokenAssets.setTxid(tx);
-                tokenAssets.setVout(n);
-                tokenAssets.setToken(quantity_int);
-                tokenAssets.setFromAddress(fromAddress);
-                tokenAssets.setTime(new Date().getTime());
-                TokenAssetsList.add(tokenAssets);
+                scriptTokenLink.setScript(toAddressHash);
+                scriptTokenLink.setTokenId(token_id_str);
+                scriptTokenLink.setTxid(tx);
+                scriptTokenLink.setVout(n);
+                scriptTokenLink.setToken(quantity_int);
+                scriptTokenLink.setFromScript(fa);
+                TokenAssetsList.add(scriptTokenLink);
+                Integer tokenAssetsMap = ty.get("tokenAssets");
+                if (tokenAssetsMap != null && tokenAssetsMap == 1) {
+                    TokenAssets tokenAssets = new TokenAssets();
+                    if (fromAddress.equals(toAddressHash)) {
+                        tokenAssets.setStatus(4);
+                    } else {
+                        tokenAssets.setStatus(2);
+                    }
+                    tokenAssets.setAddress(toAddressHash);
+                    tokenAssets.setTokenId(token_id_str);
+                    tokenAssets.setTxid(tx);
+                    tokenAssets.setVout(n);
+                    tokenAssets.setToken(quantity_int);
+                    tokenAssets.setFromAddress(fa);
+                    tokenAssets.setTime(new Date().getTime());
+                    TokenAssetsList.add(tokenAssets);
+                }
             }
-
 
             for (String address: addressList) {
                 ScriptUtxoTokenLink scriptUtxoTokenLink = new ScriptUtxoTokenLink();
