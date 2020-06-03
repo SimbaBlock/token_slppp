@@ -225,7 +225,10 @@ public class SignatureScheduler {
         } else if ("4d".equals(leng_hex)) {
 
             String length_hex = first.substring(0, 4);
-            Integer length = UnicodeUtil.decodeHEX(length_hex);
+            String b = length_hex.substring(0, 2);
+            String a = length_hex.substring(2, 4);
+            String c = a+b;
+            Integer length = UnicodeUtil.decodeHEX(c);
             first = first.replaceFirst(length_hex, "");
             OP_RETURN = first.substring(0, length*2);
             first = first.replaceFirst(OP_RETURN,"");
@@ -234,8 +237,11 @@ public class SignatureScheduler {
 
         } else if ("4e".equals(leng_hex)) {
 
-            String length_hex = first.substring(0, 6);
-            Integer length = UnicodeUtil.decodeHEX(length_hex);
+            String length_hex = first.substring(0, 8);
+            String b = length_hex.substring(0, 4);
+            String a = length_hex.substring(4, 8);
+            String c = a+b;
+            Integer length = UnicodeUtil.decodeHEX(c);
             first = first.replaceFirst(length_hex, "");
             OP_RETURN = first.substring(0, length*2);
             first = first.replaceFirst(OP_RETURN,"");
@@ -1252,9 +1258,21 @@ public class SignatureScheduler {
             slpSend.setTxid(tx);
             SlpSendList.add(slpSend);
 
+            TokenAssets tokenAssets = new TokenAssets();
 
-            for (String fa : fromAddress) {
-                TokenAssets tokenAssets = new TokenAssets();
+            if (fromAddress.size() > 1) {
+
+                tokenAssets.setStatus(5);
+                tokenAssets.setAddress(toAddressHash);
+                tokenAssets.setTokenId(token_id_str);
+                tokenAssets.setTxid(tx);
+                tokenAssets.setVout(n);
+                tokenAssets.setToken(quantity_int);
+                tokenAssets.setTime(new Date().getTime());
+                TokenAssetsList.add(tokenAssets);
+
+            } else {
+
                 if (fromAddress.equals(toAddressHash)) {
                     tokenAssets.setStatus(4);
                 } else {
@@ -1265,13 +1283,32 @@ public class SignatureScheduler {
                 tokenAssets.setTxid(tx);
                 tokenAssets.setVout(n);
                 tokenAssets.setToken(quantity_int);
-                tokenAssets.setFromAddress(fa);
+                tokenAssets.setFromAddress(fromAddress.iterator().next());
                 tokenAssets.setTime(new Date().getTime());
                 TokenAssetsList.add(tokenAssets);
 
-                Integer scriptAssets = ty.get("scriptAssets");
-                if (scriptAssets != null && scriptAssets == 1) {
-                    ScriptTokenLink scriptTokenLink = new ScriptTokenLink();
+            }
+
+
+
+            Integer scriptAssets = ty.get("scriptAssets");
+
+            if (scriptAssets != null && scriptAssets == 1) {
+
+                ScriptTokenLink scriptTokenLink = new ScriptTokenLink();
+
+                if (fromAddress.size() > 1) {
+
+                    scriptTokenLink.setStatus(5);
+                    scriptTokenLink.setScript(toAddressHash);
+                    scriptTokenLink.setTokenId(token_id_str);
+                    scriptTokenLink.setTxid(tx);
+                    scriptTokenLink.setVout(n);
+                    scriptTokenLink.setToken(quantity_int);
+                    TokenAssetsList.add(scriptTokenLink);
+
+                } else {
+
                     if (fromAddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
                         scriptTokenLink.setStatus(4);
                     } else {
@@ -1282,8 +1319,9 @@ public class SignatureScheduler {
                     scriptTokenLink.setTxid(tx);
                     scriptTokenLink.setVout(n);
                     scriptTokenLink.setToken(quantity_int);
-                    scriptTokenLink.setFromScript(fa);
+                    scriptTokenLink.setFromScript(fromAddress.iterator().next());
                     TokenAssetsList.add(scriptTokenLink);
+
                 }
             }
 
@@ -1305,8 +1343,17 @@ public class SignatureScheduler {
             scriptSlpSend.setTxid(tx);
             SlpSendList.add(scriptSlpSend);
 
-            for (String fa : fromAddress) {
-                ScriptTokenLink scriptTokenLink = new ScriptTokenLink();
+
+            ScriptTokenLink scriptTokenLink = new ScriptTokenLink();
+            if (fromAddress.size() > 1) {
+                scriptTokenLink.setStatus(5);
+                scriptTokenLink.setScript(toAddressHash);
+                scriptTokenLink.setTokenId(token_id_str);
+                scriptTokenLink.setTxid(tx);
+                scriptTokenLink.setVout(n);
+                scriptTokenLink.setToken(quantity_int);
+                TokenAssetsList.add(scriptTokenLink);
+            } else{
                 if (fromAddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
                     scriptTokenLink.setStatus(4);
                 } else {
@@ -1317,11 +1364,23 @@ public class SignatureScheduler {
                 scriptTokenLink.setTxid(tx);
                 scriptTokenLink.setVout(n);
                 scriptTokenLink.setToken(quantity_int);
-                scriptTokenLink.setFromScript(fa);
+                scriptTokenLink.setFromScript(fromAddress.iterator().next());
                 TokenAssetsList.add(scriptTokenLink);
-                Integer tokenAssetsMap = ty.get("tokenAssets");
-                if (tokenAssetsMap != null && tokenAssetsMap == 1) {
-                    TokenAssets tokenAssets = new TokenAssets();
+            }
+            Integer tokenAssetsMap = ty.get("tokenAssets");
+            if (tokenAssetsMap != null && tokenAssetsMap == 1) {
+                TokenAssets tokenAssets = new TokenAssets();
+                if (fromAddress.size() > 1) {
+                    tokenAssets.setStatus(5);
+                    tokenAssets.setAddress(toAddressHash);
+                    tokenAssets.setTokenId(token_id_str);
+                    tokenAssets.setTxid(tx);
+                    tokenAssets.setVout(n);
+                    tokenAssets.setToken(quantity_int);
+                    tokenAssets.setFromAddress(fromAddress.iterator().next());
+                    tokenAssets.setTime(new Date().getTime());
+                    TokenAssetsList.add(tokenAssets);
+                } else {
                     if (fromAddress.equals(toAddressHash)) {
                         tokenAssets.setStatus(4);
                     } else {
@@ -1332,10 +1391,11 @@ public class SignatureScheduler {
                     tokenAssets.setTxid(tx);
                     tokenAssets.setVout(n);
                     tokenAssets.setToken(quantity_int);
-                    tokenAssets.setFromAddress(fa);
+                    tokenAssets.setFromAddress(fromAddress.iterator().next());
                     tokenAssets.setTime(new Date().getTime());
                     TokenAssetsList.add(tokenAssets);
                 }
+
             }
 
             for (String address: addressList) {
