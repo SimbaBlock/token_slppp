@@ -29,4 +29,9 @@ public class KycAddressServiceImpl implements KycAddressService {
         return kycAddressMapper.selectKycAddress();
     }
 
+    @Override
+    public KycAddress findByMemberId(Integer memberId) {
+        return kycAddressMapper.findByMemberId(memberId);
+    }
+
 }

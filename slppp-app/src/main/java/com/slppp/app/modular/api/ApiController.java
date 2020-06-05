@@ -44,7 +44,6 @@ public class ApiController {
 	@Autowired
 	private KycAddressService kycAddressService;
 
-
 	@Autowired
 	private AddressHashLinkService addressHashLinkService;
 

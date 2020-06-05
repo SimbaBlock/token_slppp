@@ -10,7 +10,9 @@ import com.slppp.app.core.constant.SecurityConsts;
 import com.slppp.app.core.util.JedisUtils;
 import com.slppp.app.core.util.JsonResult;
 import com.slppp.app.modular.system.dao.MemberMapper;
+import com.slppp.app.modular.system.model.KycAddress;
 import com.slppp.app.modular.system.model.Member;
+import com.slppp.app.modular.system.service.KycAddressService;
 import com.slppp.app.modular.system.service.MemberService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -33,6 +35,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private JwtProperties jwtProperties;
+
+    @Autowired
+    private KycAddressService kycAddressService;
 
     @Override
     public int insert(Member member) {
@@ -69,7 +74,9 @@ public class MemberServiceImpl implements MemberService {
         subject.login(token);
 
 
-        return new JsonResult().addData("private_key", member.getPrivateKey()).addData("status", member.getStatus());
+        KycAddress kyc = kycAddressService.findByMemberId( member.getId());
+
+        return new JsonResult().addData("private_key", member.getPrivateKey()).addData("status", member.getStatus()).addData("name", kyc.getName());
     }
 
     @Override

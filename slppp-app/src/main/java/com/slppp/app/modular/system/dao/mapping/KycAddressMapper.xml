@@ -32,6 +32,13 @@
 		`kyc_address`
 	</select>
 
+	<select id="findByMemberId" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`kyc_address` where member_id = #{memberId}
+	</select>
+
 	<insert id="insertKycAddress" parameterType="com.slppp.app.modular.system.model.KycAddress">
 		insert into kyc_address
 		<trim prefix="(" suffix=")" suffixOverrides="," >

@@ -12,4 +12,6 @@ public interface KycAddressMapper {
 
    List<KycAddress> selectKycAddress();
 
+   KycAddress findByMemberId(Integer memberId);
+
 }
