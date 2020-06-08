@@ -1271,7 +1271,8 @@ public class SignatureScheduler {
 
             } else {
 
-                if (fromAddress.equals(toAddressHash)) {
+                String faddress = fromAddress.iterator().next();
+                if (faddress.equals(toAddressHash)) {
                     tokenAssets.setStatus(4);
                 } else {
                     tokenAssets.setStatus(2);
@@ -1281,7 +1282,7 @@ public class SignatureScheduler {
                 tokenAssets.setTxid(tx);
                 tokenAssets.setVout(n);
                 tokenAssets.setToken(quantity_int);
-                tokenAssets.setFromAddress(fromAddress.iterator().next());
+                tokenAssets.setFromAddress(faddress);
                 tokenAssets.setTime(new Date().getTime());
                 TokenAssetsList.add(tokenAssets);
 
@@ -1307,7 +1308,8 @@ public class SignatureScheduler {
 
                 } else {
 
-                    if (fromAddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
+                    String faddress = fromAddress.iterator().next();
+                    if (faddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
                         scriptTokenLink.setStatus(4);
                     } else {
                         scriptTokenLink.setStatus(2);
@@ -1317,7 +1319,7 @@ public class SignatureScheduler {
                     scriptTokenLink.setTxid(tx);
                     scriptTokenLink.setVout(n);
                     scriptTokenLink.setToken(quantity_int);
-                    scriptTokenLink.setFromScript(fromAddress.iterator().next());
+                    scriptTokenLink.setFromScript(faddress);
                     TokenAssetsList.add(scriptTokenLink);
 
                 }
@@ -1352,7 +1354,9 @@ public class SignatureScheduler {
                 scriptTokenLink.setToken(quantity_int);
                 TokenAssetsList.add(scriptTokenLink);
             } else{
-                if (fromAddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
+
+                String faddress = fromAddress.iterator().next();
+                if (faddress.equals(toAddressHash)) {                    // 脚本相同，给自己找零
                     scriptTokenLink.setStatus(4);
                 } else {
                     scriptTokenLink.setStatus(2);
@@ -1362,7 +1366,7 @@ public class SignatureScheduler {
                 scriptTokenLink.setTxid(tx);
                 scriptTokenLink.setVout(n);
                 scriptTokenLink.setToken(quantity_int);
-                scriptTokenLink.setFromScript(fromAddress.iterator().next());
+                scriptTokenLink.setFromScript(faddress);
                 TokenAssetsList.add(scriptTokenLink);
             }
             Integer tokenAssetsMap = ty.get("tokenAssets");
@@ -1379,7 +1383,8 @@ public class SignatureScheduler {
                     tokenAssets.setTime(new Date().getTime());
                     TokenAssetsList.add(tokenAssets);
                 } else {
-                    if (fromAddress.equals(toAddressHash)) {
+                    String faddress = fromAddress.iterator().next();
+                    if (faddress.equals(toAddressHash)) {
                         tokenAssets.setStatus(4);
                     } else {
                         tokenAssets.setStatus(2);
@@ -1389,7 +1394,7 @@ public class SignatureScheduler {
                     tokenAssets.setTxid(tx);
                     tokenAssets.setVout(n);
                     tokenAssets.setToken(quantity_int);
-                    tokenAssets.setFromAddress(fromAddress.iterator().next());
+                    tokenAssets.setFromAddress(faddress);
                     tokenAssets.setTime(new Date().getTime());
                     TokenAssetsList.add(tokenAssets);
                 }
