@@ -74,9 +74,17 @@ public class MemberServiceImpl implements MemberService {
         subject.login(token);
 
 
-        KycAddress kyc = kycAddressService.findByMemberId( member.getId());
+        KycAddress kyc = kycAddressService.findByMemberId(member.getId());
 
-        return new JsonResult().addData("private_key", member.getPrivateKey()).addData("status", member.getStatus()).addData("name", kyc.getName());
+        JsonResult j = new JsonResult().addData("private_key", member.getPrivateKey()).addData("status", member.getStatus());
+
+        if (kyc != null)
+            j.addData("name", kyc.getName());
+        else
+            j.addData("name", "");
+
+        return j;
+
     }
 
     @Override
