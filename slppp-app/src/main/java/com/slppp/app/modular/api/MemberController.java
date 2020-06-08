@@ -1,11 +1,15 @@
 package com.slppp.app.modular.api;
 
 import com.slppp.app.config.shiro.ShiroKit;
+import com.slppp.app.config.shiro.security.JwtUtil;
 import com.slppp.app.core.common.exception.BizExceptionEnum;
 import com.slppp.app.core.constant.SecurityConsts;
 import com.slppp.app.core.util.JsonResult;
+import com.slppp.app.modular.system.model.KycAddress;
 import com.slppp.app.modular.system.model.Member;
+import com.slppp.app.modular.system.service.KycAddressService;
 import com.slppp.app.modular.system.service.MemberService;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -31,6 +35,9 @@ public class MemberController {
 
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    private KycAddressService kycAddressService;
 
     /**
      * 用户注册
@@ -117,6 +124,28 @@ public class MemberController {
 //        mailService.send(email, subject, text);
 
         return new JsonResult();
+
+    }
+
+
+    /**
+     * 查询实名信息
+     * @param
+     * @return
+     * @throws Exception
+     */
+    @ResponseBody
+    @RequestMapping("/getKycInfo")
+    public JsonResult getKycInfo() {
+
+        Member member = memberService.findByUserName(JwtUtil.getClaim(SecurityUtils.getSubject().getPrincipal().toString(), SecurityConsts.ACCOUNT));
+
+        KycAddress kycAddress = kycAddressService.findByMemberId(member.getId());
+
+        if (kycAddress != null)
+            return new JsonResult().addData("data", kycAddress);
+        else
+            return new JsonResult();
 
     }
 
