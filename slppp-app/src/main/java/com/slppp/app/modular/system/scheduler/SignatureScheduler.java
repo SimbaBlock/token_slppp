@@ -236,9 +236,15 @@ public class SignatureScheduler {
         } else if ("4e".equals(leng_hex)) {
 
             String length_hex = first.substring(0, 8);
-            String b = length_hex.substring(0, 4);
-            String a = length_hex.substring(4, 8);
-            String c = a+b;
+            String b = length_hex.substring(0,4);
+            String b2 = b.substring(0,2);
+            String b1 = b.substring(2,4);
+            String bb = b1 + b2;
+            String a = length_hex.substring(4,8);
+            String a2 = a.substring(0,2);
+            String a1 = a.substring(2,4);
+            String aa = a1+a2;
+            String c = aa+bb;
             Integer length = UnicodeUtil.decodeHEX(c);
             first = first.replaceFirst(length_hex, "");
             OP_RETURN = first.substring(0, length*2);
