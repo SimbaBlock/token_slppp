@@ -255,7 +255,6 @@ public class SignatureScheduler {
         } else {
 
             Integer length = UnicodeUtil.decodeHEX(leng_hex);
-            first = first.replaceFirst(leng_hex, "");
             OP_RETURN = first.substring(0, length*2);
             first = first.replaceFirst(OP_RETURN,"");
             if (!"".equals(first))
